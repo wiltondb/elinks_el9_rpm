@@ -1,18 +1,16 @@
 %define rescue %{nil}
 Name: elinks
 Summary: A text-mode Web browser.
-Version: 0.9.2
-Release: 2
+Version: 0.10.1
+Release: 1
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
-Patch1: elinks-0.9.1-utf_8_io-default.patch
-Patch2: elinks-pkgconfig.patch
-Patch3: elinks-convert_string.patch
-Patch4: elinks-0.4.2-getaddrinfo.patch
-Patch5: elinks-sysname.patch
-Patch6: elinks-stdin.patch
-Patch7: elinks-0.9.2-xterm.patch
+Patch1: elinks-0.10.1-utf_8_io-default.patch
+Patch2: elinks-0.10.1-pkgconfig.patch
+Patch3: elinks-0.4.2-getaddrinfo.patch
+Patch4: elinks-sysname.patch
+Patch5: elinks-0.10.1-xterm.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -39,20 +37,14 @@ quickly and swiftly displays Web pages.
 
 %patch2 -p1 -b .pkgconfig
 
-# Avoid symbol clash (bug #131170).
-%patch3 -p1 -b .convert_string
-
 # Make getaddrinfo call use AI_ADDRCONFIG.
-%patch4 -p1 -b .getaddrinfo
+%patch3 -p1 -b .getaddrinfo
 
 # Don't put so much information in the user-agent header string (bug #97273).
-%patch5 -p1 -b .sysname
-
-# Fix elinks -dump -stdin (bug #127624).
-%patch6 -p1 -b .stdin
+%patch4 -p1 -b .sysname
 
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
-%patch7 -p1 -b .xterm
+%patch5 -p1 -b .xterm
 
 aclocal
 automake -a
@@ -87,6 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Jan 28 2005 Karel Zak <kzak@redhat.com> 0.10.1-1
+- sync with upstream; stable 0.10.1
+
 * Thu Oct 14 2004 Karel Zak <kzak@redhat.com> 0.9.2-2
 - the "Linux" driver seems better than "VT100" for xterm (#128105)
 
