@@ -2,7 +2,7 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.2
-%define beta rc2
+%define beta rc4
 %define rel 0.%{beta}.2
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}%{beta}.tar.bz2
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Aug  6 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc4.2
+- 0.9.2rc4.
+
 * Mon Jul 12 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc2.2
 - Fix elinks -dump -stdin (bug #127624).
 
