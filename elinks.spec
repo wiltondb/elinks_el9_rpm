@@ -1,16 +1,15 @@
 %define rescue %{nil}
 Name: elinks
 Summary: text mode www browser with support for frames
-Version: 0.4.3
+Version: 0.9.1
 %define rel 1
 Release: %{rel}%{rescue}
-Source: http://elinks.or.cz/download/elinks-0.4.3.tar.bz2
+Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
-Patch0: elinks-0.4.2-noegd.patch
-Patch2: elinks-0.4.2-pkgconfig.patch
-Patch3: elinks-0.4.2-textarea.patch
+Patch0: elinks-noegd.patch
+Patch2: elinks-pkgconfig.patch
 Patch4: elinks-0.4.2-getaddrinfo.patch
-Patch5: elinks-0.4.2-sysname.patch
+Patch5: elinks-sysname.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -34,9 +33,6 @@ quickly and swiftly displays Web pages.
 
 %patch2 -p1 -b .pkgconfig
 
-# Fix bug #62368.
-%patch3 -p1 -b .textarea
-
 # Make getaddrinfo call use AI_ADDRCONFIG.
 %patch4 -p1 -b .getaddrinfo
 
@@ -59,11 +55,13 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 ln -s elinks $RPM_BUILD_ROOT%{_bindir}/links
 ln -s elinks.1 $RPM_BUILD_ROOT%{_mandir}/man1/links.1
+rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
+%find_lang elinks
 
 %clean
-rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
+rm -rf $RPM_BUILD_ROOT
 
-%files
+%files -f elinks.lang
 %defattr(-,root,root)
 %doc README SITES TODO manual-0.82-en
 %{_bindir}/links
@@ -73,6 +71,13 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %{_mandir}/man5/*
 
 %changelog
+* Thu Mar 11 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-1
+- 0.9.1.
+- Use %%find_lang.
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Mon Dec  8 2003 Tim Waugh <twaugh@redhat.com> 0.4.3-1
 - 0.4.3.
 - Updated pkgconfig patch.
