@@ -2,8 +2,8 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.2
-%define beta rc4
-%define rel 0.%{beta}.3
+%define beta rc7
+%define rel 0.%{beta}.4
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}%{beta}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
@@ -85,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Sep 20 2004 Jindrich Novy <jnovy@redhat.com> 0.9.2-0.rc7.4
+- 0.9.2rc7.
+
 * Mon Sep 13 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc4.3
 - Avoid symbol clash (bug #131170).
 
