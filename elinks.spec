@@ -3,13 +3,14 @@ Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.2
 %define beta rc4
-%define rel 0.%{beta}.2
+%define rel 0.%{beta}.3
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}%{beta}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
 Patch1: elinks-0.9.1-utf_8_io-default.patch
 Patch2: elinks-pkgconfig.patch
+Patch3: elinks-convert_string.patch
 Patch4: elinks-0.4.2-getaddrinfo.patch
 Patch5: elinks-sysname.patch
 Patch6: elinks-stdin.patch
@@ -38,6 +39,9 @@ quickly and swiftly displays Web pages.
 %patch1 -p1 -b .utf_8_io-default
 
 %patch2 -p1 -b .pkgconfig
+
+# Avoid symbol clash (bug #131170).
+%patch3 -p1 -b .convert_string
 
 # Make getaddrinfo call use AI_ADDRCONFIG.
 %patch4 -p1 -b .getaddrinfo
@@ -81,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Sep 13 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc4.3
+- Avoid symbol clash (bug #131170).
+
 * Fri Aug  6 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc4.2
 - 0.9.2rc4.
 
