@@ -2,7 +2,7 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.1
-%define rel 2
+%define rel 3
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
@@ -48,6 +48,7 @@ automake -a
 autoconf
 
 %build
+export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
 %configure %{?rescue:--without-gpm} --without-x
 %if "%{rescue}" != ""
 perl -pi -e "s,-O2,-O2 -Os,g" Make* */Make*
@@ -75,6 +76,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Jun  2 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-3
+- Build with LFS support (bug #125064).
+
 * Fri May 28 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-2
 - Use UTF-8 by default (bug #76445).
 
