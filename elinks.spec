@@ -2,10 +2,8 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.9.2
-%define beta rc7
-%define rel 0.%{beta}.4
-Release: %{rel}%{rescue}
-Source: http://elinks.or.cz/download/elinks-%{version}%{beta}.tar.bz2
+Release: 1
+Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
 Patch1: elinks-0.9.1-utf_8_io-default.patch
@@ -30,7 +28,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -a 1 -n %{name}-%{version}%{beta}
+%setup -q -a 1 -n %{name}-%{version}
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1 -b .noegd
@@ -85,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Oct  6 2004 Karel Zak <kzak@redhat.com> 0.9.2-1
+- upload new upstream tarball with stable 0.9.2 release
+
 * Mon Sep 20 2004 Jindrich Novy <jnovy@redhat.com> 0.9.2-0.rc7.4
 - 0.9.2rc7.
 - changed summary in spec to get rid of #41732, #61499
