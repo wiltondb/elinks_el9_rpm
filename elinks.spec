@@ -1,8 +1,8 @@
 %define rescue %{nil}
 Name: elinks
 Summary: A text-mode Web browser.
-Version: 0.10.2
-Release: 2
+Version: 0.10.3
+Release: 1
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
@@ -79,6 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Mar 21 2005 Karel Zak <kzak@redhat.com> 0.10.3-1
+- sync with upstream; stable 0.10.3
+
 * Sat Mar  5 2005 Karel Zak <kzak@redhat.com> 0.10.2-2
 - rebuilt
 
