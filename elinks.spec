@@ -3,12 +3,15 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.4.2
-%define rel 1
+%define rel 7.1
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-0.4.2.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
+Patch0: elinks-0.4.2-noegd.patch
 Patch2: elinks-0.4.2-pkgconfig.patch
 Patch3: elinks-0.4.2-textarea.patch
+Patch4: elinks-0.4.2-getaddrinfo.patch
+Patch5: elinks-0.4.2-sysname.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -26,17 +29,27 @@ quickly and swiftly displays Web pages.
 
 %prep
 %setup -q -a 1 -n %{name}-%{DATE}
+
+# Prevent crash when HOME is unset (bug #90663).
+%patch0 -p1 -b .noegd
+
 %patch2 -p1 -b .pkgconfig
 
 # Fix bug #62368.
 %patch3 -p1 -b .textarea
+
+# Make getaddrinfo call use AI_ADDRCONFIG.
+%patch4 -p1 -b .getaddrinfo
+
+# Don't put so much information in the user-agent header string (bug #97273).
+%patch5 -p1 -b .sysname
 
 aclocal
 automake -a
 autoconf
 
 %build
-%configure %{?rescue:--without-gpm}
+%configure %{?rescue:--without-gpm} --without-x
 %if "%{rescue}" != ""
 perl -pi -e "s,-O2,-O2 -Os,g" Make* */Make*
 %endif
@@ -45,8 +58,8 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-ln -s %{_bindir}/elinks $RPM_BUILD_ROOT%{_bindir}/links
-ln -s %{_mandir}/man1/elinks.1 $RPM_BUILD_ROOT%{_mandir}/man1/links.1
+ln -s elinks $RPM_BUILD_ROOT%{_bindir}/links
+ln -s elinks.1 $RPM_BUILD_ROOT%{_mandir}/man1/links.1
 
 %clean
 rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
@@ -61,6 +74,37 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %{_mandir}/man5/*
 
 %changelog
+* Mon Aug 11 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-7.1
+- Rebuilt.
+
+* Mon Aug 11 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-7
+- Don't require XFree86-libs (bug #102072).
+
+* Tue Jul 22 2003 Nalin Dahyabhai <nalin@redhat.com> 0.4.2-6.2
+- rebuild
+
+* Thu Jun 12 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-6.1
+- Rebuilt.
+
+* Thu Jun 12 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-6
+- Make getaddrinfo call use AI_ADDRCONFIG.
+- Don't put so much information in the user-agent header string (bug #97273).
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Mon Jun  2 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-4.1
+- Rebuild again.
+
+* Mon Jun  2 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-4
+- Rebuild.
+
+* Mon May 12 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-3
+- Prevent crash when HOME is unset (bug #90663).
+
+* Sun May 04 2003 Florian La Roche <Florian.LaRoche@redhat.de> 0.4.2-2
+- use relative symlinks to elinks
+
 * Wed Feb  5 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-1
 - 0.4.2 (bug #83273).
 
