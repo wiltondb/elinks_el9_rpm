@@ -3,7 +3,7 @@ Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.2
 %define beta rc2
-%define rel 0.%{beta}.1
+%define rel 0.%{beta}.2
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}%{beta}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
@@ -12,6 +12,7 @@ Patch1: elinks-0.9.1-utf_8_io-default.patch
 Patch2: elinks-pkgconfig.patch
 Patch4: elinks-0.4.2-getaddrinfo.patch
 Patch5: elinks-sysname.patch
+Patch6: elinks-stdin.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -43,6 +44,9 @@ quickly and swiftly displays Web pages.
 
 # Don't put so much information in the user-agent header string (bug #97273).
 %patch5 -p1 -b .sysname
+
+# Fix elinks -dump -stdin (bug #127624).
+%patch6 -p1 -b .stdin
 
 aclocal
 automake -a
@@ -77,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Jul 12 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc2.2
+- Fix elinks -dump -stdin (bug #127624).
+
 * Thu Jul  1 2004 Tim Waugh <twaugh@redhat.com> 0.9.2-0.rc2.1
 - 0.9.2rc2.
 
