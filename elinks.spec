@@ -2,11 +2,12 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.1
-%define rel 1
+%define rel 2
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
+Patch1: elinks-0.9.1-utf_8_io-default.patch
 Patch2: elinks-pkgconfig.patch
 Patch4: elinks-0.4.2-getaddrinfo.patch
 Patch5: elinks-sysname.patch
@@ -30,6 +31,9 @@ quickly and swiftly displays Web pages.
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1 -b .noegd
+
+# UTF-8 by default
+%patch1 -p1 -b .utf_8_io-default
 
 %patch2 -p1 -b .pkgconfig
 
@@ -71,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri May 28 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-2
+- Use UTF-8 by default (bug #76445).
+
 * Thu Mar 11 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-1
 - 0.9.1.
 - Use %%find_lang.
