@@ -2,7 +2,7 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.9.1
-%define rel 3
+%define rel 4
 Release: %{rel}%{rescue}
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
@@ -76,6 +76,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Wed Jun  2 2004 Tim Waugh <twaugh@redhat.com> 0.9.1-3
 - Build with LFS support (bug #125064).
 
