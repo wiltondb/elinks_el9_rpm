@@ -1,17 +1,18 @@
-%define DATE 0.3.2
+%define DATE 0.4.2
 %define rescue %{nil}
 Name: elinks
 Summary: text mode www browser with support for frames
-Version: 0.3.2
+Version: 0.4.2
 %define rel 1
 Release: %{rel}%{rescue}
-Source: ftp://ftp.pld.org.pl/software/elinks/elinks-%{version}.tar.bz2
+Source: http://elinks.or.cz/download/elinks-0.4.2.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
-Patch0: links-0.92-nogpm.patch
-Patch1: links-0.96-cookiefix.patch
+Patch2: elinks-0.4.2-pkgconfig.patch
+Patch3: elinks-0.4.2-textarea.patch
 Group: Applications/Internet
-URL: http://elinks.pld.org.pl/
+URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
+BuildRequires: autoconf, automake, openssl-devel, pkgconfig
 License: GPL
 Provides: webclient
 Obsoletes: links
@@ -25,14 +26,17 @@ quickly and swiftly displays Web pages.
 
 %prep
 %setup -q -a 1 -n %{name}-%{DATE}
-%if "%{rescue}" != ""
-%patch0 -p1 -b .nogpm
+%patch2 -p1 -b .pkgconfig
+
+# Fix bug #62368.
+%patch3 -p1 -b .textarea
+
+aclocal
+automake -a
 autoconf
-%endif
-%patch1 -p1 -b .cookiefix
 
 %build
-%configure
+%configure %{?rescue:--without-gpm}
 %if "%{rescue}" != ""
 perl -pi -e "s,-O2,-O2 -Os,g" Make* */Make*
 %endif
@@ -41,6 +45,8 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
+ln -s %{_bindir}/elinks $RPM_BUILD_ROOT%{_bindir}/links
+ln -s %{_mandir}/man1/elinks.1 $RPM_BUILD_ROOT%{_mandir}/man1/links.1
 
 %clean
 rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
@@ -49,9 +55,33 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %defattr(-,root,root)
 %doc README SITES TODO manual-0.82-en
 %{_bindir}/links
+%{_bindir}/elinks
 %{_mandir}/man1/links.1*
+%{_mandir}/man1/elinks.1*
+%{_mandir}/man5/*
 
 %changelog
+* Wed Feb  5 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-1
+- 0.4.2 (bug #83273).
+
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com> 0.3.2-5
+- rebuilt
+
+* Thu Jan 16 2003 Tim Waugh <twaugh@redhat.com>
+- Fix URL (bug #81987).
+
+* Tue Jan  7 2003 Nalin Dahyabhai <nalin@redhat.com> 0.3.2-4
+- rebuild
+
+* Mon Dec 23 2002 Tim Waugh <twaugh@redhat.com> 0.3.2-3
+- Fix bug #62368.
+
+* Thu Dec 12 2002 Nalin Dahyabhai <nalin@redhat.com>
+- use openssl's pkg-config data, if available
+
+* Wed Nov 20 2002 Tim Powers <timp@redhat.com> 0.3.2-2
+- rebuild on all arches
+
 * Tue Aug 20 2002 Jakub Jelinek <jakub@redhat.com> 0.3.2-1
 - update to 0.3.2 to fix the DNS Ctrl-C segfaults
 - update URLs, the project moved
