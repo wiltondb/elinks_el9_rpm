@@ -1,16 +1,16 @@
-%define DATE 20020302
+%define DATE 0.3.2
 %define rescue %{nil}
 Name: elinks
 Summary: text mode www browser with support for frames
-Version: 0.3.0
-%define rel 3
+Version: 0.3.2
+%define rel 1
 Release: %{rel}%{rescue}
-Source: http://pasky.ji.cz/elinks/elinks-%{version}.tar.bz2
+Source: ftp://ftp.pld.org.pl/software/elinks/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: links-0.92-nogpm.patch
 Patch1: links-0.96-cookiefix.patch
 Group: Applications/Internet
-URL: http://pasky.ji.cz/elinks/
+URL: http://elinks.pld.org.pl/
 BuildRoot: %{_tmppath}/%{name}-buildroot
 License: GPL
 Provides: webclient
@@ -49,8 +49,14 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %defattr(-,root,root)
 %doc README SITES TODO manual-0.82-en
 %{_bindir}/links
+%{_mandir}/man1/links.1*
 
 %changelog
+* Tue Aug 20 2002 Jakub Jelinek <jakub@redhat.com> 0.3.2-1
+- update to 0.3.2 to fix the DNS Ctrl-C segfaults
+- update URLs, the project moved
+- include man page
+
 * Fri Jun 21 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
