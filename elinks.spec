@@ -3,7 +3,7 @@
 Name: elinks
 Summary: text mode www browser with support for frames
 Version: 0.3.0
-%define rel 1
+%define rel 3
 Release: %{rel}%{rescue}
 Source: http://pasky.ji.cz/elinks/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
@@ -51,6 +51,12 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %{_bindir}/links
 
 %changelog
+* Fri Jun 21 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Thu May 23 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
 * Thu Jan 24 2002 Tim Powers <timp@redhat.com>
 - rebuilt against new openssl
 
