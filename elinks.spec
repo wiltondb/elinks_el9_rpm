@@ -1,11 +1,10 @@
-%define DATE 0.4.2
 %define rescue %{nil}
 Name: elinks
 Summary: text mode www browser with support for frames
-Version: 0.4.2
-%define rel 7.1
+Version: 0.4.3
+%define rel 1
 Release: %{rel}%{rescue}
-Source: http://elinks.or.cz/download/elinks-0.4.2.tar.bz2
+Source: http://elinks.or.cz/download/elinks-0.4.3.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-0.4.2-noegd.patch
 Patch2: elinks-0.4.2-pkgconfig.patch
@@ -28,7 +27,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -a 1 -n %{name}-%{DATE}
+%setup -q -a 1 -n %{name}-%{version}
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1 -b .noegd
@@ -74,6 +73,10 @@ rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/%{name}-%{version}
 %{_mandir}/man5/*
 
 %changelog
+* Mon Dec  8 2003 Tim Waugh <twaugh@redhat.com> 0.4.3-1
+- 0.4.3.
+- Updated pkgconfig patch.
+
 * Mon Aug 11 2003 Tim Waugh <twaugh@redhat.com> 0.4.2-7.1
 - Rebuilt.
 
