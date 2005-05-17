@@ -2,7 +2,7 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.10.3
-Release: 2
+Release: 3
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
@@ -13,6 +13,7 @@ Patch4: elinks-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.10.3-arrows.patch
 Patch7: elinks-0.10.3-c.patch
+Patch8: elinks-0.10.3-union.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -33,26 +34,21 @@ quickly and swiftly displays Web pages.
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1 -b .noegd
-
 # UTF-8 by default
 %patch1 -p1 -b .utf_8_io-default
-
 %patch2 -p1 -b .pkgconfig
-
 # Make getaddrinfo call use AI_ADDRCONFIG.
 %patch3 -p1 -b .getaddrinfo
-
 # Don't put so much information in the user-agent header string (bug #97273).
 %patch4 -p1 -b .sysname
-
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 %patch5 -p1 -b .xterm
-
 # Don't call isdigit() on values outside of [-1, UCHAR_MAX] (#152953)
 %patch6 -p1 -b .arrows
-
 # Fix violations of C aliasing rules (#156647)
 %patch7 -p1 -b .c
+# Fix #157300 - Strange behavior on ppc64
+%patch8 -p1 -b .union
 
 aclocal
 automake -a
@@ -87,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue May 17 2005 Karel Zak <kzak@redhat.com> 0.10.3-3
+- fix #157300 - Strange behavior on ppc64 (patch by Miloslav Trmac)
+
 * Tue May 10 2005 Miloslav Trmac <mitr@redhat.com> - 0.10.3-2
 - Fix checking for numeric command prefix (#152953, patch by Jonas Fonseca)
 - Fix invalid C causing assertion errors on ppc and ia64 (#156647)
