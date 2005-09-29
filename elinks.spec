@@ -1,8 +1,8 @@
 %define rescue %{nil}
 Name: elinks
 Summary: A text-mode Web browser.
-Version: 0.10.3
-Release: 3
+Version: 0.10.6
+Release: 1
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Patch0: elinks-noegd.patch
@@ -11,9 +11,7 @@ Patch2: elinks-0.10.1-pkgconfig.patch
 Patch3: elinks-0.4.2-getaddrinfo.patch
 Patch4: elinks-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
-Patch6: elinks-0.10.3-arrows.patch
-Patch7: elinks-0.10.3-c.patch
-Patch8: elinks-0.10.3-union.patch
+Patch6: elinks-0.10.3-union.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -43,18 +41,14 @@ quickly and swiftly displays Web pages.
 %patch4 -p1 -b .sysname
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 %patch5 -p1 -b .xterm
-# Don't call isdigit() on values outside of [-1, UCHAR_MAX] (#152953)
-%patch6 -p1 -b .arrows
-# Fix violations of C aliasing rules (#156647)
-%patch7 -p1 -b .c
 # Fix #157300 - Strange behavior on ppc64
-%patch8 -p1 -b .union
+%patch6 -p1 -b .union
 
+%build
 aclocal
 automake -a
 autoconf
 
-%build
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
 %configure %{?rescue:--without-gpm} --without-x
 %if "%{rescue}" != ""
@@ -83,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Sep 29 2005 Karel Zak <kzak@redhat.com> 0.10.6-1
+- update to new upstream version
+
 * Tue May 17 2005 Karel Zak <kzak@redhat.com> 0.10.3-3
 - fix #157300 - Strange behavior on ppc64 (patch by Miloslav Trmac)
 
