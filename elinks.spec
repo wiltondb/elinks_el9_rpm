@@ -22,6 +22,8 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 
+Patch7: elinks-0.11.0-srcdir.patch
+
 %description
 Links is a text-based Web browser. Links does not display any images,
 but it does support frames, tables and most other HTML tags. Links'
@@ -44,6 +46,8 @@ quickly and swiftly displays Web pages.
 %patch5 -p1 -b .xterm
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1 -b .union
+# Fix build system
+%patch7 -p1 -b .srcdir
 
 %build
 #aclocal
@@ -81,6 +85,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Tue Jan 10 2006 Karel Zak <kzak@redhat.com> 0.11.0-1
 - update to new upstream version
+- fix 0.11.0 build system (srcdir.patch)
 - regenerate patches:
      elinks-0.11.0-getaddrinfo.patch, 
      elinks-0.11.0-ssl-noegd.patch,
