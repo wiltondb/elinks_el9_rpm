@@ -1,17 +1,10 @@
 %define rescue %{nil}
 Name: elinks
 Summary: A text-mode Web browser.
-Version: 0.10.6
-Release: 2.1
+Version: 0.11.0
+Release: 1
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
-Patch0: elinks-noegd.patch
-Patch1: elinks-0.10.1-utf_8_io-default.patch
-Patch2: elinks-0.10.1-pkgconfig.patch
-Patch3: elinks-0.4.2-getaddrinfo.patch
-Patch4: elinks-sysname.patch
-Patch5: elinks-0.10.1-xterm.patch
-Patch6: elinks-0.10.3-union.patch
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -20,6 +13,14 @@ License: GPL
 Provides: webclient
 Obsoletes: links
 Provides: links
+
+Patch0: elinks-0.11.0-ssl-noegd.patch
+Patch1: elinks-0.10.1-utf_8_io-default.patch
+Patch2: elinks-0.10.1-pkgconfig.patch
+Patch3: elinks-0.11.0-getaddrinfo.patch
+Patch4: elinks-0.11.0-sysname.patch
+Patch5: elinks-0.10.1-xterm.patch
+Patch6: elinks-0.11.0-union.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -45,9 +46,10 @@ quickly and swiftly displays Web pages.
 %patch6 -p1 -b .union
 
 %build
-aclocal
-automake -a
-autoconf
+#aclocal
+#automake -a
+#autoconf
+./autogen.sh
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
 %configure %{?rescue:--without-gpm} --without-x
@@ -77,7 +79,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
-* Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
+* Tue Jan 10 2006 Karel Zak <kzak@redhat.com> 0.11.0-1
+- update to new upstream version
+- regenerate patches:
+     elinks-0.11.0-getaddrinfo.patch, 
+     elinks-0.11.0-ssl-noegd.patch,
+     elinks-0.11.0-sysname.patch,
+     elinks-0.11.0-union.patch
+
+* Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com> 0.10.6-2.1
 - rebuilt
 
 * Wed Nov  9 2005 Karel Zak <kzak@redhat.com> 0.10.6-2
