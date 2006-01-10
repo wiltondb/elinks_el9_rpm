@@ -2,7 +2,7 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.11.0
-Release: 1
+Release: 2
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Group: Applications/Internet
@@ -83,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jan 10 2006 Karel Zak <kzak@redhat.com> 0.11.0-2
+- use upstream version of srcdir.patch
+
 * Tue Jan 10 2006 Karel Zak <kzak@redhat.com> 0.11.0-1
 - update to new upstream version
 - fix 0.11.0 build system (srcdir.patch)
