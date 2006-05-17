@@ -2,13 +2,14 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.11.0
-Release: 2.2
+Release: 3
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
 BuildRequires: autoconf, automake, openssl-devel, pkgconfig
+BuildRequires: bzip2-devel, expat-devel,libidn-devel
 License: GPL
 Provides: webclient
 Obsoletes: links
@@ -83,6 +84,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed May 17 2006 Karsten Hopp <karsten@redhat.de> 0.11.0-3
+- add buildrequires bzip2-devel, expat-devel,libidn-devel
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 0.11.0-2.2
 - bump again for double-long bug on ppc(64)
 
