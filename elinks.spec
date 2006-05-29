@@ -1,15 +1,15 @@
 %define rescue %{nil}
 Name: elinks
 Summary: A text-mode Web browser.
-Version: 0.11.0
-Release: 3
+Version: 0.11.1
+Release: 2
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
 BuildRequires: autoconf, automake, openssl-devel, pkgconfig
-BuildRequires: bzip2-devel, expat-devel,libidn-devel
+BuildRequires: bzip2-devel, expat-devel, libidn-devel
 License: GPL
 Provides: webclient
 Obsoletes: links
@@ -22,8 +22,6 @@ Patch3: elinks-0.11.0-getaddrinfo.patch
 Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
-
-Patch7: elinks-0.11.0-srcdir.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -47,8 +45,6 @@ quickly and swiftly displays Web pages.
 %patch5 -p1 -b .xterm
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1 -b .union
-# Fix build system
-%patch7 -p1 -b .srcdir
 
 %build
 #aclocal
@@ -84,6 +80,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon May 29 2006 Karel Zak <kzak@redhat.com> 0.11.1-2
+- update to new upstream version
+
 * Wed May 17 2006 Karsten Hopp <karsten@redhat.de> 0.11.0-3
 - add buildrequires bzip2-devel, expat-devel,libidn-devel
 
