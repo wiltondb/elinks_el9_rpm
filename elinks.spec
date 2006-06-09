@@ -2,14 +2,21 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.11.1
-Release: 2
+Release: 3
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
-Source1: http://links.sourceforge.net/download/docs/manual-0.82-en.tar.bz2
 Group: Applications/Internet
 URL: http://elinks.or.cz/
 BuildRoot: %{_tmppath}/%{name}-buildroot
-BuildRequires: autoconf, automake, openssl-devel, pkgconfig
-BuildRequires: bzip2-devel, expat-devel, libidn-devel
+
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: pkgconfig
+BuildRequires: openssl-devel
+BuildRequires: krb5-devel
+BuildRequires: bzip2-devel
+BuildRequires: expat-devel
+BuildRequires: libidn-devel
+
 License: GPL
 Provides: webclient
 Obsoletes: links
@@ -22,6 +29,7 @@ Patch3: elinks-0.11.0-getaddrinfo.patch
 Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
+Patch7: elinks-0.11.1-negotiate.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -30,7 +38,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -a 1 -n %{name}-%{version}
+%setup -q -n %{name}-%{version}
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1 -b .noegd
@@ -45,6 +53,9 @@ quickly and swiftly displays Web pages.
 %patch5 -p1 -b .xterm
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1 -b .union
+# Fix #194096 – elinks should support negotiate-auth
+%patch7 -p1 -b .negotiate
+
 
 %build
 #aclocal
@@ -53,7 +64,7 @@ quickly and swiftly displays Web pages.
 ./autogen.sh
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
-%configure %{?rescue:--without-gpm} --without-x
+%configure %{?rescue:--without-gpm} --without-x --with-gssapi
 %if "%{rescue}" != ""
 perl -pi -e "s,-O2,-O2 -Os,g" Make* */Make*
 %endif
@@ -72,7 +83,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f elinks.lang
 %defattr(-,root,root)
-%doc README SITES TODO manual-0.82-en
+%doc README SITES TODO
 %{_bindir}/links
 %{_bindir}/elinks
 %{_mandir}/man1/links.1*
@@ -80,6 +91,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Jun  9 2006 Karel Zak <kzak@redhat.com> 0.11.1-3
+- added negotiate-auth (GSSAPI) support -- EXPERIMENTAL!
+
 * Mon May 29 2006 Karel Zak <kzak@redhat.com> 0.11.1-2
 - update to new upstream version
 
