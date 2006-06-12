@@ -1,5 +1,5 @@
 --- elinks-0.11.1/Makefile.config.in.negotiate	2006-01-29 14:10:33.000000000 +0100
-+++ elinks-0.11.1/Makefile.config.in	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/Makefile.config.in	2006-06-12 20:33:59.000000000 +0200
 @@ -148,6 +148,7 @@
  CONFIG_WIN32 = @CONFIG_WIN32@
  CONFIG_XBEL_BOOKMARKS = @CONFIG_XBEL_BOOKMARKS@
@@ -9,7 +9,7 @@
  DEFS = @DEFS@
  CFLAGS = @CFLAGS@
 --- elinks-0.11.1/config.h.in.negotiate	2006-01-29 14:10:46.000000000 +0100
-+++ elinks-0.11.1/config.h.in	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/config.h.in	2006-06-12 20:33:59.000000000 +0200
 @@ -84,6 +84,9 @@
  /* Define if you want: gpm support */
  #undef CONFIG_GPM
@@ -21,7 +21,7 @@
  #undef CONFIG_GUILE
  
 --- elinks-0.11.1/src/protocol/http/Makefile.negotiate	2006-01-29 14:10:39.000000000 +0100
-+++ elinks-0.11.1/src/protocol/http/Makefile	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/src/protocol/http/Makefile	2006-06-12 20:33:59.000000000 +0200
 @@ -1,6 +1,8 @@
  top_builddir=../../..
  include $(top_builddir)/Makefile.config
@@ -32,7 +32,7 @@
  
  include $(top_srcdir)/Makefile.lib
 --- /dev/null	2006-05-28 11:31:41.625940250 +0200
-+++ elinks-0.11.1/src/protocol/http/http_negotiate.h	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/src/protocol/http/http_negotiate.h	2006-06-12 22:52:18.000000000 +0200
 @@ -0,0 +1,16 @@
 +
 +#ifndef EL__PROTOCOL_HTTP_HTTP_NEGOTIATE_H
@@ -43,7 +43,7 @@
 +
 +
 +int http_negotiate_input(struct connection *conn, struct uri *uri, 
-+					int type, unsigned char *data);
++			int type, unsigned char *data);
 +
 +int http_negotiate_output(struct uri *uri, struct string *header);
 +
@@ -51,8 +51,8 @@
 +#endif /* EL_PROTOCOL_HTTP_HTTP_NEGOTIATE_H */
 +
 --- /dev/null	2006-05-28 11:31:41.625940250 +0200
-+++ elinks-0.11.1/src/protocol/http/http_negotiate.c	2006-06-09 13:14:25.000000000 +0200
-@@ -0,0 +1,259 @@
++++ elinks-0.11.1/src/protocol/http/http_negotiate.c	2006-06-12 23:09:49.000000000 +0200
+@@ -0,0 +1,287 @@
 +/* 
 + * HTTP Negotiate authentication method -- based on GSSAPI
 + *
@@ -96,6 +96,7 @@
 +	gss_ctx_id_t	context;
 +	gss_name_t	server_name;
 +	gss_buffer_desc output_token;
++	gss_buffer_desc input_token;
 +};
 +
 +static INIT_LIST_HEAD(negotiate_list);
@@ -143,6 +144,12 @@
 +	if (full && neg->server_name)
 +		gss_release_name(&minor_status, &neg->server_name);
 +
++	if (full && neg->input_token.length != 0) {
++		/* allocated by mem_free().. so beter not use gss_release_buffer() */
++		mem_free(neg->input_token.value);
++		neg->input_token.length = 0;
++	}
++	
 +	if (full)
 +		memset(neg, 0, sizeof(*neg));
 +}
@@ -170,7 +177,7 @@
 +
 +	token.length = strlen(service) + 1 + uri->hostlen + 1;
 +	if (token.length + 1 > sizeof(name))
-+		return EMSGSIZE;
++		return -1;
 +
 +	snprintf(name, token.length, "%s@%*s", service, uri->hostlen, uri->host);
 +
@@ -225,15 +232,47 @@
 +	return 0;
 +}
 +
++static int
++http_negotiate_create_context(struct negotiate *neg)
++{
++	OM_uint32 major_status, minor_status;
++
++	major_status = gss_init_sec_context(&minor_status,
++					    GSS_C_NO_CREDENTIAL,
++					    &neg->context,
++					    neg->server_name,
++					    GSS_C_NO_OID,
++					    GSS_C_DELEG_FLAG,
++					    0,
++					    GSS_C_NO_CHANNEL_BINDINGS,
++					    &neg->input_token,
++					    NULL,
++					    &neg->output_token,
++					    NULL,
++					    NULL);
++	neg->status = major_status;
++
++	if (GSS_ERROR(major_status)) 
++		return -1;
++	if (neg->output_token.length == 0) 
++		return -1;
++
++	return 0;
++}
++
++/*
++ * Register new negotiate-auth request
++ *
++ * It's possible that server sends to client input token (at least
++ * libcurl supports it) in WWW-Authenticate header, but ususaly 
++ * is this input token undefined.
++ */
 +int 
 +http_negotiate_input(struct connection *conn, struct uri *uri, 
 +					int type, unsigned char *data)
 +{
-+	OM_uint32 major_status, minor_status, minor_status2;
-+	gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
-+	gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
 +	struct negotiate *neg;
-+	int ret, isnew = 0;
++	int ret = 0, isnew = 0;
 +
 +	neg = http_negotiate_get(uri, &isnew, 1);
 +	
@@ -250,41 +289,19 @@
 +		http_negotiate_cleanup(neg, 1);
 +		return -1;
 +	}
-+	if (neg->server_name == NULL && (ret = http_negotiate_get_name(conn, neg)))
-+		return ret;
-+	if (data && http_negotiate_parse_data(data, type, &input_token)) 
++	if (neg->server_name == NULL && http_negotiate_get_name(conn, neg) < 0)
 +		return -1;
-+	
-+	major_status = gss_init_sec_context(&minor_status,
-+					    GSS_C_NO_CREDENTIAL,
-+					    &neg->context,
-+					    neg->server_name,
-+					    GSS_C_NO_OID,
-+					    GSS_C_DELEG_FLAG,
-+					    0,
-+					    GSS_C_NO_CHANNEL_BINDINGS,
-+					    &input_token,
-+					    NULL,
-+					    &output_token,
-+					    NULL,
-+					    NULL);
-+	if (input_token.length > 0)
-+		gss_release_buffer(&minor_status2, &input_token);
-+	neg->status = major_status;
-+
-+	if (GSS_ERROR(major_status)) 
++	if (data && http_negotiate_parse_data(data, type, &neg->input_token)) 
 +		return -1;
-+	if (output_token.length == 0) 
-+		return -1;
-+
-+	neg->output_token = output_token;
-+
-+	if (isnew)
++	if ((ret=http_negotiate_create_context(neg)) == 0 && isnew)
 +		http_negotiate_save(neg);
 +
-+	return 0;
++	return ret;
 +}
 +
++/*
++ * Fill output token to "Authorization: Negotiate <token>".
++ */
 +int
 +http_negotiate_output(struct uri *uri, struct string *header)
 +{
@@ -292,9 +309,17 @@
 +	char *encoded = NULL;
 +	int len = 0;
 +
-+	neg = http_negotiate_get(uri, NULL, 0);	
-+	if (neg==NULL || neg->output_token.length==0) 
++	if (!(neg = http_negotiate_get(uri, NULL, 0)))
 +		return -1;
++	
++	if (neg->output_token.length==0) {
++		if (http_negotiate_create_context(neg) < 0) {		
++			/* full cleanup on error and ask for 
++			   new WWW-Authenticate from server */
++			http_negotiate_cleanup(neg, 1);
++			return -1;
++		}
++	}
 +	
 +	encoded = base64_encode_bin((unsigned char *) neg->output_token.value, 
 +				neg->output_token.length, &len);
@@ -309,11 +334,14 @@
 +	add_crlf_to_string(header);
 +	
 +	http_negotiate_cleanup(neg, 0);
++
++	mem_free(encoded);
++	
 +	return 0;
 +}
 +
 --- elinks-0.11.1/src/protocol/http/http.c.negotiate	2006-01-29 14:10:39.000000000 +0100
-+++ elinks-0.11.1/src/protocol/http/http.c	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/src/protocol/http/http.c	2006-06-12 23:06:57.000000000 +0200
 @@ -47,6 +47,9 @@
  #include "util/memory.h"
  #include "util/string.h"
@@ -324,15 +352,7 @@
  
  struct http_version {
  	int major;
-@@ -82,7 +85,6 @@
- 	int code;
- };
- 
--
- static struct auth_entry proxy_auth;
- 
- static unsigned char *accept_charset = NULL;
-@@ -551,7 +553,7 @@
+@@ -551,7 +554,7 @@
  	int trace = get_opt_bool("protocol.http.trace");
  	struct string header;
  	unsigned char *post_data = NULL;
@@ -341,7 +361,7 @@
  	struct uri *uri = conn->proxied_uri; /* Set to the real uri */
  	unsigned char *optstr;
  	int use_connect, talking_to_proxy;
-@@ -808,7 +810,11 @@
+@@ -808,7 +811,11 @@
  		add_crlf_to_string(&header);
  	}
  
@@ -354,7 +374,7 @@
  	if (entry) {
  		if (entry->digest) {
  			unsigned char *response;
-@@ -1327,12 +1333,12 @@
+@@ -1327,12 +1334,13 @@
  	return 0;
  }
  
@@ -362,6 +382,7 @@
 -static void
 -check_http_authentication(struct uri *uri, unsigned char *header,
 -			  unsigned char *header_field)
++/* returns 1 if we need retry the connection (for negotiate-auth only) */
 +static int
 +check_http_authentication(struct connection *conn, struct uri *uri, 
 +		unsigned char *header, unsigned char *header_field)
@@ -371,7 +392,7 @@
  
  	d = parse_header(header, header_field, &str);
  	while (d) {
-@@ -1358,10 +1364,24 @@
+@@ -1358,10 +1366,24 @@
  			mem_free(d);
  			break;
  		}
@@ -397,19 +418,15 @@
  }
  
  
-@@ -1588,11 +1608,17 @@
+@@ -1588,11 +1610,13 @@
  	}
  
  	if (h == 401) {
 -		unsigned char *head = conn->cached->head;
 -
 -		check_http_authentication(uri, head, "WWW-Authenticate");
-+		int ret = check_http_authentication(conn, uri, 
-+				conn->cached->head, "WWW-Authenticate");
-+	
-+		
-+		if (ret) {
-+			// XXX: mem_free(conn->cached->head);
++		if (check_http_authentication(conn, uri, 
++				conn->cached->head, "WWW-Authenticate")) {
 +			retry_connection(conn, S_RESTART);
 +			return;
 +		}
@@ -420,7 +437,7 @@
  		unsigned char *str;
  
 --- elinks-0.11.1/src/util/base64.c.negotiate	2006-01-29 14:10:39.000000000 +0100
-+++ elinks-0.11.1/src/util/base64.c	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/src/util/base64.c	2006-06-12 20:33:59.000000000 +0200
 @@ -17,14 +17,21 @@
  unsigned char *
  base64_encode(register unsigned char *in)
@@ -499,7 +516,7 @@
  
  decode_error:
 --- elinks-0.11.1/src/util/base64.h.negotiate	2006-01-29 14:10:39.000000000 +0100
-+++ elinks-0.11.1/src/util/base64.h	2006-06-09 13:09:41.000000000 +0200
++++ elinks-0.11.1/src/util/base64.h	2006-06-12 20:33:59.000000000 +0200
 @@ -4,4 +4,7 @@
  unsigned char *base64_encode(unsigned char *);
  unsigned char *base64_decode(unsigned char *);
@@ -508,8 +525,8 @@
 +unsigned char *base64_decode_bin(unsigned char *, int, int *);
 +
  #endif
---- elinks-0.11.1/configure.in.negotiate	2006-06-09 13:09:41.000000000 +0200
-+++ elinks-0.11.1/configure.in	2006-06-09 13:09:41.000000000 +0200
+--- elinks-0.11.1/configure.in.negotiate	2006-06-12 20:33:59.000000000 +0200
++++ elinks-0.11.1/configure.in	2006-06-12 20:33:59.000000000 +0200
 @@ -447,6 +447,30 @@
  	[  --without-idn           disable international domain names support])
  
