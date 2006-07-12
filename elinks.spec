@@ -2,7 +2,7 @@
 Name: elinks
 Summary: A text-mode Web browser.
 Version: 0.11.1
-Release: 4
+Release: 4.1
 Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Group: Applications/Internet
 URL: http://elinks.or.cz/
@@ -91,6 +91,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 0.11.1-4.1
+- rebuild
+
 * Mon Jun 12 2006 Karel Zak <kzak@redhat.com> 0.11.1-4
 - improved negotiate-auth patch (faster now)
 
