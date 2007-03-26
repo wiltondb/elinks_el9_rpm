@@ -1,12 +1,12 @@
-%define rescue %{nil}
-Name: elinks
-Summary: A text-mode Web browser.
-Version: 0.11.1
-Release: 5
-Source: http://elinks.or.cz/download/elinks-%{version}.tar.bz2
-Group: Applications/Internet
-URL: http://elinks.or.cz/
-BuildRoot: %{_tmppath}/%{name}-buildroot
+Name:      elinks
+Summary:   A text-mode Web browser
+Version:   0.11.2
+Release:   1%{?dist}
+License:   GPL
+URL:       http://elinks.or.cz
+Group:     Applications/Internet
+Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: autoconf
 BuildRequires: automake
@@ -17,10 +17,9 @@ BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: libidn-devel
 
-License: GPL
-Provides: webclient
+Provides:  webclient
 Obsoletes: links
-Provides: links
+Provides:  links
 
 Patch0: elinks-0.11.0-ssl-noegd.patch
 Patch1: elinks-0.10.1-utf_8_io-default.patch
@@ -42,35 +41,29 @@ quickly and swiftly displays Web pages.
 %setup -q -n %{name}-%{version}
 
 # Prevent crash when HOME is unset (bug #90663).
-%patch0 -p1 -b .noegd
+%patch0 -p1
 # UTF-8 by default
-%patch1 -p1 -b .utf_8_io-default
-%patch2 -p1 -b .pkgconfig
+%patch1 -p1
+%patch2 -p1
 # Make getaddrinfo call use AI_ADDRCONFIG.
-%patch3 -p1 -b .getaddrinfo
+%patch3 -p1
 # Don't put so much information in the user-agent header string (bug #97273).
-%patch4 -p1 -b .sysname
+%patch4 -p1
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
-%patch5 -p1 -b .xterm
+%patch5 -p1
 # Fix #157300 - Strange behavior on ppc64
-%patch6 -p1 -b .union
+%patch6 -p1
 # Fix #194096 – elinks should support negotiate-auth
-%patch7 -p1 -b .negotiate
+%patch7 -p1
 # Fix #210103 - elinks crashes when given bad HTTP_PROXY
-%patch8 -p1 -b .badproxy
+%patch8 -p1
 
 %build
-#aclocal
-#automake -a
-#autoconf
 ./autogen.sh
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi
-%if "%{rescue}" != ""
-perl -pi -e "s,-O2,-O2 -Os,g" Make* */Make*
-%endif
-make
+make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -93,6 +86,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Mar 26 2007 Karel Zak <kzak@redhat.com> 0.11.2-1
+- update to new upstream version
+- cleanup spec file
+
 * Wed Oct 11 2006 Karel Zak <kzak@redhat.com> 0.11.1-5
 - fix #210103 - elinks crashes when given bad HTTP_PROXY
 
