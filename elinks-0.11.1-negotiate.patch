@@ -352,28 +352,18 @@
  
  struct http_version {
  	int major;
-@@ -551,7 +554,7 @@
- 	int trace = get_opt_bool("protocol.http.trace");
- 	struct string header;
- 	unsigned char *post_data = NULL;
--	struct auth_entry *entry;
-+	struct auth_entry *entry = NULL;
- 	struct uri *uri = conn->proxied_uri; /* Set to the real uri */
- 	unsigned char *optstr;
- 	int use_connect, talking_to_proxy;
-@@ -808,7 +811,11 @@
- 		add_crlf_to_string(&header);
+@@ -846,7 +849,11 @@
  	}
  
--	entry = find_auth(uri);
+  	/* CONNECT: The Authorization header is for the origin server only.  */
 +#ifdef CONFIG_GSSAPI
-+	if (http_negotiate_output(uri, &header) != 0)
++	if (http_negotiate_output(uri, &header) != 0) {
++#else
+  	if (!use_connect) {
 +#endif
-+		entry = find_auth(uri);
-+	
+ 		entry = find_auth(uri);
+  	}
  	if (entry) {
- 		if (entry->digest) {
- 			unsigned char *response;
 @@ -1327,12 +1334,13 @@
  	return 0;
  }

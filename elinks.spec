@@ -1,6 +1,6 @@
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.11.2
+Version:   0.11.3
 Release:   1%{?dist}
 License:   GPL
 URL:       http://elinks.or.cz
@@ -29,7 +29,6 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.1-negotiate.patch
-Patch8: elinks-0.11.1-badproxy.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -55,8 +54,6 @@ quickly and swiftly displays Web pages.
 %patch6 -p1
 # Fix #194096 – elinks should support negotiate-auth
 %patch7 -p1
-# Fix #210103 - elinks crashes when given bad HTTP_PROXY
-%patch8 -p1
 
 %build
 ./autogen.sh
@@ -86,6 +83,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jun  5 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-1
+- update to new upstream version
+- removed patch for #210103 , included in upstream release
+- updated patch elinks-0.11.1-negotiate.patch to pass build
+
 * Mon Mar 26 2007 Karel Zak <kzak@redhat.com> 0.11.2-1
 - update to new upstream version
 - cleanup spec file
