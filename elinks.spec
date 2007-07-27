@@ -1,18 +1,15 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   GPL
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
 Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: autoconf
 BuildRequires: automake
-BuildRequires: pkgconfig
 BuildRequires: openssl-devel
-BuildRequires: krb5-devel
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: libidn-devel
@@ -75,7 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f elinks.lang
 %defattr(-,root,root)
-%doc README SITES TODO
+%doc README SITES TODO COPYING
 %{_bindir}/links
 %{_bindir}/elinks
 %{_mandir}/man1/links.1*
@@ -83,6 +80,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Jul 27 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-2
+- cleanup of duplicates in buildreq, added license file to doc 
+- (package review by Tyler Owen(#225725))
+
 * Tue Jun  5 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-1
 - update to new upstream version
 - removed patch for #210103 , included in upstream release
