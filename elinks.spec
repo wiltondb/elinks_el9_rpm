@@ -26,6 +26,7 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.1-negotiate.patch
+Patch8: elinks-0.11.3-macropen.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -51,6 +52,8 @@ quickly and swiftly displays Web pages.
 %patch6 -p1
 # Fix #194096 – elinks should support negotiate-auth
 %patch7 -p1
+# fix for open macro in new glibc 
+%patch8 -p1
 
 %build
 ./autogen.sh
@@ -80,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Aug  9 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-3
+- fix of open macro(new glibc) by Joe Orton
+
 * Fri Jul 27 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-2
 - cleanup of duplicates in buildreq, added license file to doc 
 - (package review by Tyler Owen(#225725))
