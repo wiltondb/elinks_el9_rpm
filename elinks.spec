@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   2%{?dist}
+Release:   3%{?dist}
 License:   GPL
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
