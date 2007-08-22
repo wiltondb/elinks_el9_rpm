@@ -1,8 +1,8 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   3%{?dist}
-License:   GPL
+Release:   4%{?dist}
+License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
 Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
@@ -83,6 +83,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Aug 22 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-4
+- rebuilt for F8
+- changed license tag to GPLv2
+
 * Thu Aug  9 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-3
 - fix of open macro(new glibc) by Joe Orton
 
