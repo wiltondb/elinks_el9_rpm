@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   4%{?dist}
+Release:   5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -83,6 +83,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Aug 28 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-5
+- rebuilt because of expat 2.0
+
 * Wed Aug 22 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-4
 - rebuilt for F8
 - changed license tag to GPLv2
