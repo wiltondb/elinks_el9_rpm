@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   5%{?dist}
+Release:   6%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -17,6 +17,7 @@ BuildRequires: libidn-devel
 Provides:  webclient
 Obsoletes: links
 Provides:  links
+Provides: text-www-browser
 
 Patch0: elinks-0.11.0-ssl-noegd.patch
 Patch1: elinks-0.10.1-utf_8_io-default.patch
@@ -83,6 +84,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Oct 11 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-6
+- generalized text-www-browser requirements(#174566)
+
 * Tue Aug 28 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-5
 - rebuilt because of expat 2.0
 
