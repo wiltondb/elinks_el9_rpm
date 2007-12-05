@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.3
-Release:   6%{?dist}
+Release:   7%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -84,6 +84,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Dec 05 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-7
+- rebuilt because of new OpenSSL
+
 * Thu Oct 11 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-6
 - generalized text-www-browser requirements(#174566)
 
