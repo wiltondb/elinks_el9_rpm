@@ -1,11 +1,11 @@
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.11.3
-Release:   7%{?dist}
+Version:   0.11.4
+Release:   0.1.rc0%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}rc0.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
@@ -36,7 +36,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n %{name}-%{version}rc0
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -60,7 +60,8 @@ quickly and swiftly displays Web pages.
 ./autogen.sh
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
-%configure %{?rescue:--without-gpm} --without-x --with-gssapi
+%configure %{?rescue:--without-gpm} --without-x --with-gssapi \
+  --enable-bittorrent
 make %{?_smp_mflags}
 
 %install
@@ -84,6 +85,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Feb 06 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-0.1.rc0
+- new version marked stable by upstream 0.11.4rc0
+- enabled experimental bittorent support(#426702)
+
 * Wed Dec 05 2007 Ondrej Vasik <ovasik@redhat.com> 0.11.3-7
 - rebuilt because of new OpenSSL
 
