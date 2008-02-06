@@ -28,6 +28,7 @@ Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.1-negotiate.patch
 Patch8: elinks-0.11.3-macropen.patch
+Patch9: elinks-0.11.4-gcc43NI_MAXHOST.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -55,6 +56,8 @@ quickly and swiftly displays Web pages.
 %patch7 -p1
 # fix for open macro in new glibc 
 %patch8 -p1
+# fix for gcc4.3 build
+%patch9 -p1
 
 %build
 ./autogen.sh
