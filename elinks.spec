@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.4
-Release:   0.1.rc0%{?dist}
+Release:   0.2.rc0%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -28,7 +28,6 @@ Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.1-negotiate.patch
 Patch8: elinks-0.11.3-macropen.patch
-Patch9: elinks-0.11.4-gcc43NI_MAXHOST.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -56,13 +55,11 @@ quickly and swiftly displays Web pages.
 %patch7 -p1
 # fix for open macro in new glibc 
 %patch8 -p1
-# fix for gcc4.3 build
-%patch9 -p1
 
 %build
 ./autogen.sh
 
-export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS)"
+export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
   --enable-bittorrent
 make %{?_smp_mflags}
@@ -88,6 +85,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Feb 07 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-0.2.rc0
+- used -D_GNU_SOURCE instead of ugly hack/patch to 
+  have NI_MAXPATH defined
+
 * Wed Feb 06 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-0.1.rc0
 - new version marked stable by upstream 0.11.4rc0
 - enabled experimental bittorent support(#426702)
