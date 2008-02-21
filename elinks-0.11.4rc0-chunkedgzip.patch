@@ -1,0 +1,1017 @@
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/bzip2.c elinks-0.11.4rc0/src/encoding/bzip2.c
+--- elinks-0.11.4rc0-orig/src/encoding/bzip2.c	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/bzip2.c	2008-02-20 00:40:04.000000000 +0100
+@@ -12,6 +12,7 @@
+ #ifdef HAVE_BZLIB_H
+ #include <bzlib.h> /* Everything needs this after stdio.h */
+ #endif
++#include <errno.h>
+ 
+ #include "elinks.h"
+ 
+@@ -19,30 +20,55 @@
+ #include "encoding/encoding.h"
+ #include "util/memory.h"
+ 
++/* How many bytes of compressed data to read before decompressing.
++ * This is currently defined as BZ_MAX_UNUSED to make the behaviour
++ * similar to BZ2_bzRead; but other values would work too.  */
++#define ELINKS_BZ_BUFFER_LENGTH BZ_MAX_UNUSED
+ 
+ struct bz2_enc_data {
+-	FILE *file;
+-	BZFILE *bzfile;
+-	int last_read; /* If err after last bzRead() was BZ_STREAM_END.. */
+-};
++	bz_stream fbz_stream;
++
++	/* The file descriptor from which we read.  */
++	int fdread;
+ 
+-/* TODO: When it'll be official, use bzdopen() from Yoshioka Tsuneo. --pasky */
++	/* Initially 0; set to 1 when BZ2_bzDecompress indicates
++	 * BZ_STREAM_END, which means it has found the bzip2-specific
++	 * end-of-stream marker and all data has been decompressed.
++	 * Then we neither read from the file nor call BZ2_bzDecompress
++	 * any more.  */
++	int last_read;
++
++	/* A buffer for data that has been read from the file but not
++	 * yet decompressed.  fbz_stream.next_in and fbz_stream.avail_in
++	 * refer to this buffer.  */
++	unsigned char buf[ELINKS_BZ_BUFFER_LENGTH];
++};
+ 
+ static int
+ bzip2_open(struct stream_encoded *stream, int fd)
+ {
++	/* A zero-initialized bz_stream.  The compiler ensures that all
++	 * pointer members in it are null.  (Can't do this with memset
++	 * because C99 does not require all-bits-zero to be a null
++	 * pointer.)  */
++	static const bz_stream null_bz_stream = {0};
++
+ 	struct bz2_enc_data *data = mem_alloc(sizeof(*data));
+ 	int err;
+ 
++	stream->data = NULL;
+ 	if (!data) {
+ 		return -1;
+ 	}
+-	data->last_read = 0;
+ 
+-	data->file = fdopen(fd, "rb");
++	/* Initialize all members of *data, except data->buf[], which
++	 * will be initialized on demand by bzip2_read.  */
++	copy_struct(&data->fbz_stream, &null_bz_stream);
++	data->fdread = fd;
++	data->last_read = 0;
+ 
+-	data->bzfile = BZ2_bzReadOpen(&err, data->file, 0, 0, NULL, 0);
+-	if (!data->bzfile) {
++	err = BZ2_bzDecompressInit(&data->fbz_stream, 0, 0);
++	if (err != BZ_OK) {
+ 		mem_free(data);
+ 		return -1;
+ 	}
+@@ -58,25 +84,45 @@ bzip2_read(struct stream_encoded *stream
+ 	struct bz2_enc_data *data = (struct bz2_enc_data *) stream->data;
+ 	int err = 0;
+ 
+-	if (data->last_read)
+-		return 0;
++	if (!data) return -1;
+ 
+-	len = BZ2_bzRead(&err, data->bzfile, buf, len);
++	assert(len > 0);
+ 
+-	if (err == BZ_STREAM_END)
+-		data->last_read = 1;
+-	else if (err)
+-		return -1;
++	if (data->last_read) return 0;
+ 
+-	return len;
+-}
++	data->fbz_stream.avail_out = len;
++	data->fbz_stream.next_out = buf;
+ 
+-static unsigned char *
+-bzip2_decode(struct stream_encoded *stream, unsigned char *data, int len,
+-	     int *new_len)
+-{
+-	*new_len = len;
+-	return data;
++	do {
++		if (data->fbz_stream.avail_in == 0) {
++			int l = safe_read(data->fdread, data->buf,
++			                  ELINKS_BZ_BUFFER_LENGTH);
++
++			if (l == -1) {
++				if (errno == EAGAIN)
++					break;
++				else
++					return -1; /* I/O error */
++			} else if (l == 0) {
++				/* EOF. It is error: we wait for more bytes */
++				return -1;
++			}
++
++			data->fbz_stream.next_in = data->buf;
++			data->fbz_stream.avail_in = l;
++		}
++
++		err = BZ2_bzDecompress(&data->fbz_stream);
++		if (err == BZ_STREAM_END) {
++			data->last_read = 1;
++			break;
++		} else if (err != BZ_OK) {
++			return -1;
++		}
++	} while (data->fbz_stream.avail_out > 0);
++
++	assert(len - data->fbz_stream.avail_out == data->fbz_stream.next_out - (char *) buf);
++	return len - data->fbz_stream.avail_out;
+ }
+ 
+ #ifdef CONFIG_SMALL
+@@ -92,6 +138,8 @@ bzip2_decode_buffer(unsigned char *data,
+ 	unsigned char *buffer = NULL;
+ 	int error;
+ 
++	*new_len = 0;	  /* default, left there if an error occurs */
++
+ 	memset(&stream, 0, sizeof(bz_stream));
+ 	stream.next_in = data;
+ 	stream.avail_in = len;
+@@ -122,7 +170,6 @@ bzip2_decode_buffer(unsigned char *data,
+ 
+ 		error = BZ2_bzDecompress(&stream);
+ 		if (error == BZ_STREAM_END) {
+-			*new_len = stream.total_out_lo32;
+ 			error = BZ_OK;
+ 			break;
+ 		}
+@@ -135,34 +182,35 @@ bzip2_decode_buffer(unsigned char *data,
+ 
+ 	BZ2_bzDecompressEnd(&stream);
+ 
+-	if (error != BZ_OK) {
++	if (error == BZ_OK) {
++		*new_len = stream.total_out_lo32;
++		return buffer;
++	} else {
+ 		if (buffer) mem_free(buffer);
+-		*new_len = 0;
+ 		return NULL;
+ 	}
+-
+-	return buffer;
+ }
+ 
+ static void
+ bzip2_close(struct stream_encoded *stream)
+ {
+ 	struct bz2_enc_data *data = (struct bz2_enc_data *) stream->data;
+-	int err;
+ 
+-	BZ2_bzReadClose(&err, data->bzfile);
+-	fclose(data->file);
+-	mem_free(data);
++	if (data) {
++		BZ2_bzDecompressEnd(&data->fbz_stream);
++		close(data->fdread);
++		mem_free(data);
++		stream->data = 0;
++	}
+ }
+ 
+-static unsigned char *bzip2_extensions[] = { ".bz2", ".tbz", NULL };
++static const unsigned char *const bzip2_extensions[] = { ".bz2", ".tbz", NULL };
+ 
+-struct decoding_backend bzip2_decoding_backend = {
++const struct decoding_backend bzip2_decoding_backend = {
+ 	"bzip2",
+ 	bzip2_extensions,
+ 	bzip2_open,
+ 	bzip2_read,
+-	bzip2_decode,
+ 	bzip2_decode_buffer,
+ 	bzip2_close,
+ };
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/bzip2.h elinks-0.11.4rc0/src/encoding/bzip2.h
+--- elinks-0.11.4rc0-orig/src/encoding/bzip2.h	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/bzip2.h	2008-02-20 00:40:04.000000000 +0100
+@@ -4,7 +4,7 @@
+ #include "encoding/encoding.h"
+ 
+ #ifdef CONFIG_BZIP2
+-extern struct decoding_backend bzip2_decoding_backend;
++extern const struct decoding_backend bzip2_decoding_backend;
+ #else
+ #define bzip2_decoding_backend dummy_decoding_backend
+ #endif
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/deflate.c elinks-0.11.4rc0/src/encoding/deflate.c
+--- elinks-0.11.4rc0-orig/src/encoding/deflate.c	1970-01-01 01:00:00.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/deflate.c	2008-02-20 00:40:04.000000000 +0100
+@@ -0,0 +1,201 @@
++/* deflate/gzip encoding backend */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <string.h>
++#ifdef HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++#ifdef HAVE_ZLIB_H
++#include <zlib.h>
++#endif
++#include <errno.h>
++
++#include "elinks.h"
++
++#include "encoding/deflate.h"
++#include "encoding/encoding.h"
++#include "util/memory.h"
++
++/* How many bytes of compressed data to read before decompressing. */
++#define ELINKS_DEFLATE_BUFFER_LENGTH 5000
++
++struct deflate_enc_data {
++	z_stream deflate_stream;
++
++	/* The file descriptor from which we read.  */
++	int fdread;
++
++	unsigned int last_read:1;
++
++	/* A buffer for data that has been read from the file but not
++	 * yet decompressed.  z_stream.next_in and z_stream.avail_in
++	 * refer to this buffer.  */
++	unsigned char buf[ELINKS_DEFLATE_BUFFER_LENGTH];
++};
++
++static int
++deflate_open(struct stream_encoded *stream, int fd)
++{
++	/* A zero-initialized z_stream.  The compiler ensures that all
++	 * pointer members in it are null.  (Can't do this with memset
++	 * because C99 does not require all-bits-zero to be a null
++	 * pointer.)  */
++	static const z_stream null_z_stream = {0};
++	int err;
++
++	struct deflate_enc_data *data = mem_alloc(sizeof(*data));
++
++	stream->data = NULL;
++	if (!data) {
++		return -1;
++	}
++
++	/* Initialize all members of *data, except data->buf[], which
++	 * will be initialized on demand by deflate_read.  */
++	copy_struct(&data->deflate_stream, &null_z_stream);
++	data->fdread = fd;
++	data->last_read = 0;
++
++	err = inflateInit2(&data->deflate_stream, MAX_WBITS | 32);
++	if (err != Z_OK) {
++		mem_free(data);
++		return -1;
++	}
++	stream->data = data;
++
++	return 0;
++}
++
++static int
++deflate_read(struct stream_encoded *stream, unsigned char *buf, int len)
++{
++	struct deflate_enc_data *data = (struct deflate_enc_data *) stream->data;
++	int err = 0;
++
++	if (!data) return -1;
++
++	assert(len > 0);
++
++	if (data->last_read) return 0;
++
++	data->deflate_stream.avail_out = len;
++	data->deflate_stream.next_out = buf;
++
++	do {
++		if (data->deflate_stream.avail_in == 0) {
++			int l = safe_read(data->fdread, data->buf,
++			                  ELINKS_DEFLATE_BUFFER_LENGTH);
++
++			if (l == -1) {
++				if (errno == EAGAIN)
++					break;
++				else
++					return -1; /* I/O error */
++			} else if (l == 0) {
++				/* EOF. It is error: we wait for more bytes */
++				return -1;
++			}
++
++			data->deflate_stream.next_in = data->buf;
++			data->deflate_stream.avail_in = l;
++		}
++		err = inflate(&data->deflate_stream, Z_SYNC_FLUSH);
++		if (err == Z_STREAM_END) {
++			data->last_read = 1;
++			break;
++		} else if (err != Z_OK) {
++			return -1;
++		}
++	} while (data->deflate_stream.avail_out > 0);
++
++	assert(len - data->deflate_stream.avail_out == data->deflate_stream.next_out - buf);
++	return len - data->deflate_stream.avail_out;
++}
++
++static unsigned char *
++deflate_decode_buffer(unsigned char *data, int len, int *new_len)
++{
++	z_stream stream;
++	unsigned char *buffer = NULL;
++	int error;
++
++	*new_len = 0;	  /* default, left there if an error occurs */
++
++	if (!len) return NULL;
++	memset(&stream, 0, sizeof(z_stream));
++	stream.next_in = data;
++	stream.avail_in = len;
++
++	if (inflateInit2(&stream, MAX_WBITS | 32) != Z_OK)
++		return NULL;
++
++	do {
++		unsigned char *new_buffer;
++		size_t size = stream.total_out + MAX_STR_LEN;
++
++		new_buffer = mem_realloc(buffer, size);
++		if (!new_buffer) {
++			error = Z_MEM_ERROR;
++			break;
++		}
++
++		buffer		 = new_buffer;
++		stream.next_out  = buffer + stream.total_out;
++		stream.avail_out = MAX_STR_LEN;
++
++		error = inflate(&stream, Z_SYNC_FLUSH);
++		if (error == Z_STREAM_END) {
++			error = Z_OK;
++			break;
++		}
++	} while (error == Z_OK && stream.avail_in > 0);
++
++	inflateEnd(&stream);
++
++	if (error == Z_OK) {
++		*new_len = stream.total_out;
++		return buffer;
++	} else {
++		if (buffer) mem_free(buffer);
++		return NULL;
++	}
++}
++
++static void
++deflate_close(struct stream_encoded *stream)
++{
++	struct deflate_enc_data *data = (struct deflate_enc_data *) stream->data;
++
++	if (data) {
++		inflateEnd(&data->deflate_stream);
++		close(data->fdread);
++		mem_free(data);
++		stream->data = 0;
++	}
++}
++
++static const unsigned char *const deflate_extensions[] = { NULL };
++
++const struct decoding_backend deflate_decoding_backend = {
++	"deflate",
++	deflate_extensions,
++	deflate_open,
++	deflate_read,
++	deflate_decode_buffer,
++	deflate_close,
++};
++
++static const unsigned char *const gzip_extensions[] = { ".gz", ".tgz", NULL };
++
++const struct decoding_backend gzip_decoding_backend = {
++	"gzip",
++	gzip_extensions,
++	deflate_open,
++	deflate_read,
++	deflate_decode_buffer,
++	deflate_close,
++};
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/deflate.h elinks-0.11.4rc0/src/encoding/deflate.h
+--- elinks-0.11.4rc0-orig/src/encoding/deflate.h	1970-01-01 01:00:00.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/deflate.h	2008-02-20 00:40:04.000000000 +0100
+@@ -0,0 +1,14 @@
++#ifndef EL__ENCODING_DEFLATE_H
++#define EL__ENCODING_DEFLATE_H
++
++#include "encoding/encoding.h"
++
++#ifdef CONFIG_GZIP
++extern const struct decoding_backend deflate_decoding_backend;
++extern const struct decoding_backend gzip_decoding_backend;
++#else
++#define deflate_decoding_backend dummy_decoding_backend
++#define gzip_decoding_backend dummy_decoding_backend
++#endif
++
++#endif
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/encoding.c elinks-0.11.4rc0/src/encoding/encoding.c
+--- elinks-0.11.4rc0-orig/src/encoding/encoding.c	2008-02-21 13:19:57.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/encoding.c	2008-02-21 14:11:54.000000000 +0100
+@@ -52,14 +52,6 @@ dummy_read(struct stream_encoded *stream
+ }
+ 
+ static unsigned char *
+-dummy_decode(struct stream_encoded *stream, unsigned char *data, int len,
+-	     int *new_len)
+-{
+-	*new_len = len;
+-	return data;
+-}
+-
+-static unsigned char *
+ dummy_decode_buffer(unsigned char *data, int len, int *new_len)
+ {
+ 	unsigned char *buffer = memacpy(data, len);
+@@ -77,14 +69,13 @@ dummy_close(struct stream_encoded *strea
+ 	mem_free(stream->data);
+ }
+ 
+-static unsigned char *dummy_extensions[] = { NULL };
++static const unsigned char *const dummy_extensions[] = { NULL };
+ 
+-static struct decoding_backend dummy_decoding_backend = {
++static const struct decoding_backend dummy_decoding_backend = {
+ 	"none",
+ 	dummy_extensions,
+ 	dummy_open,
+ 	dummy_read,
+-	dummy_decode,
+ 	dummy_decode_buffer,
+ 	dummy_close,
+ };
+@@ -93,12 +84,13 @@ static struct decoding_backend dummy_dec
+ /* Dynamic backend area */
+ 
+ #include "encoding/bzip2.h"
+-#include "encoding/gzip.h"
++#include "encoding/deflate.h"
+ 
+-static struct decoding_backend *decoding_backends[] = {
++static const struct decoding_backend *const decoding_backends[] = {
+ 	&dummy_decoding_backend,
+ 	&gzip_decoding_backend,
+ 	&bzip2_decoding_backend,
++	&deflate_decoding_backend,
+ };
+ 
+ 
+@@ -133,16 +125,9 @@ read_encoded(struct stream_encoded *stre
+ 	return decoding_backends[stream->encoding]->read(stream, data, len);
+ }
+ 
+-/* Decode the given chunk of data in the context of @stream. @data contains the
+- * original data chunk, @len bytes long. The resulting decoded data chunk is
+- * *@new_len bytes long. */
+-unsigned char *
+-decode_encoded(struct stream_encoded *stream, unsigned char *data, int len,
+-		int *new_len)
+-{
+-	return decoding_backends[stream->encoding]->decode(stream, data, len, new_len);
+-}
+-
++/* Decode an entire file from a buffer. This function is not suitable
++ * for parts of files. @data contains the original data, @len bytes
++ * long. The resulting decoded data chunk is *@new_len bytes long. */
+ unsigned char *
+ decode_encoded_buffer(enum stream_encoding encoding, unsigned char *data, int len,
+ 		      int *new_len)
+@@ -161,7 +146,7 @@ close_encoded(struct stream_encoded *str
+ 
+ 
+ /* Return a list of extensions associated with that encoding. */
+-unsigned char **listext_encoded(enum stream_encoding encoding)
++const unsigned char *const *listext_encoded(enum stream_encoding encoding)
+ {
+ 	return decoding_backends[encoding]->extensions;
+ }
+@@ -174,7 +159,7 @@ guess_encoding(unsigned char *filename)
+ 	int enc;
+ 
+ 	for (enc = 1; enc < ENCODINGS_KNOWN; enc++) {
+-		unsigned char **ext = decoding_backends[enc]->extensions;
++		const unsigned char *const *ext = decoding_backends[enc]->extensions;
+ 
+ 		while (ext && *ext) {
+ 			int len = strlen(*ext);
+@@ -189,7 +174,7 @@ guess_encoding(unsigned char *filename)
+ 	return ENCODING_NONE;
+ }
+ 
+-unsigned char *
++const unsigned char *
+ get_encoding_name(enum stream_encoding encoding)
+ {
+ 	return decoding_backends[encoding]->name;
+@@ -208,7 +193,7 @@ try_encoding_extensions(struct string *f
+ 
+ 	/* No file of that name was found, try some others names. */
+ 	for (encoding = 1; encoding < ENCODINGS_KNOWN; encoding++) {
+-		unsigned char **ext = listext_encoded(encoding);
++		const unsigned char *const *ext = listext_encoded(encoding);
+ 
+ 		for (; ext && *ext; ext++) {
+ 			add_to_string(filename, *ext);
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/encoding.h elinks-0.11.4rc0/src/encoding/encoding.h
+--- elinks-0.11.4rc0-orig/src/encoding/encoding.h	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/encoding.h	2008-02-21 14:12:23.000000000 +0100
+@@ -8,6 +8,7 @@ enum stream_encoding {
+ 	ENCODING_NONE = 0,
+ 	ENCODING_GZIP,
+ 	ENCODING_BZIP2,
++  ENCODING_DEFLATE,
+ 
+ 	/* Max. number of known encoding including ENCODING_NONE. */
+ 	ENCODINGS_KNOWN,
+@@ -19,24 +20,22 @@ struct stream_encoded {
+ };
+ 
+ struct decoding_backend {
+-	unsigned char *name;
+-	unsigned char **extensions;
++	const unsigned char *name;
++	const unsigned char *const *extensions;
+ 	int (*open)(struct stream_encoded *stream, int fd);
+ 	int (*read)(struct stream_encoded *stream, unsigned char *data, int len);
+-	unsigned char *(*decode)(struct stream_encoded *stream, unsigned char *data, int len, int *new_len);
+ 	unsigned char *(*decode_buffer)(unsigned char *data, int len, int *new_len);
+ 	void (*close)(struct stream_encoded *stream);
+ };
+ 
+ struct stream_encoded *open_encoded(int, enum stream_encoding);
+ int read_encoded(struct stream_encoded *, unsigned char *, int);
+-unsigned char *decode_encoded(struct stream_encoded *, unsigned char *, int, int *);
+ unsigned char *decode_encoded_buffer(enum stream_encoding encoding, unsigned char *data, int len, int *new_len);
+ void close_encoded(struct stream_encoded *);
+ 
+-unsigned char **listext_encoded(enum stream_encoding);
++const unsigned char *const *listext_encoded(enum stream_encoding);
+ enum stream_encoding guess_encoding(unsigned char *filename);
+-unsigned char *get_encoding_name(enum stream_encoding encoding);
++const unsigned char *get_encoding_name(enum stream_encoding encoding);
+ 
+ /* Read from open @stream into the @page string */
+ enum connection_state
+Binární soubory elinks-0.11.4rc0-orig/src/encoding/encoding.o a elinks-0.11.4rc0/src/encoding/encoding.o jsou různé
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/gzip.c elinks-0.11.4rc0/src/encoding/gzip.c
+--- elinks-0.11.4rc0-orig/src/encoding/gzip.c	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/gzip.c	1970-01-01 01:00:00.000000000 +0100
+@@ -1,249 +0,0 @@
+-/* Gzip encoding (ENCODING_GZIP) backend */
+-
+-#ifdef HAVE_CONFIG_H
+-#include "config.h"
+-#endif
+-
+-#include <stdio.h>
+-#include <string.h>
+-#ifdef HAVE_UNISTD_H
+-#include <unistd.h>
+-#endif
+-#ifdef HAVE_ZLIB_H
+-#include <zlib.h>
+-#endif
+-
+-#include "elinks.h"
+-
+-#include "encoding/encoding.h"
+-#include "encoding/gzip.h"
+-#include "osdep/osdep.h"
+-#include "util/memory.h"
+-
+-
+-static int
+-gzip_open(struct stream_encoded *stream, int fd)
+-{
+-	stream->data = (void *) gzdopen(fd, "rb");
+-	if (!stream->data) return -1;
+-
+-	return 0;
+-}
+-
+-static int
+-gzip_read(struct stream_encoded *stream, unsigned char *data, int len)
+-{
+-	return gzread((gzFile *) stream->data, data, len);
+-}
+-
+-static unsigned char *
+-gzip_decode(struct stream_encoded *stream, unsigned char *data, int len,
+-	    int *new_len)
+-{
+-	*new_len = len;
+-	return data;
+-}
+-
+-
+-/* The following code for decoding gzip in memory is a mix of code from zlib's
+- * gzio.c file copyrighted 1995-2002 by Jean-loup Gailly and the costumized
+- * header extraction in the linux kernels lib/inflate.c file not copyrighted
+- * 1992 by Mark Adler. */
+-
+-static int gzip_header_magic[2] = { 0x1f, 0x8b };
+-
+-enum gzip_header_flag {
+-	GZIP_ASCII_TEXT	 = 0x01, /* File probably ascii text (unused) */
+-	GZIP_HEADER_CRC	 = 0x02, /* Header CRC present */
+-	GZIP_EXTRA_FIELD = 0x04, /* Extra field present */
+-	GZIP_ORIG_NAME	 = 0x08, /* Original file name present */
+-	GZIP_COMMENT	 = 0x10, /* File comment present */
+-	GZIP_RESERVED	 = 0xE0, /* bits 5..7: reserved */
+-};
+-
+-/* Read a byte from a gz_stream; update next_in and avail_in. Return EOF for
+- * end of file. */
+-static int
+-get_gzip_byte(z_stream *stream)
+-{
+-	if (stream->avail_in == 0)
+-		return EOF;
+-
+-	stream->avail_in--;
+-
+-	return *(stream->next_in)++;
+-}
+-
+-#define skip_gzip_bytes(stream, bytes) \
+-	do { int i = bytes; while (i-- > 0) get_gzip_byte(stream); } while (0)
+-
+-#define skip_gzip_string(stream) \
+-	do { int i; while ((i = get_gzip_byte(stream)) != 0 && i != EOF) ; } while (0)
+-
+-/* Check the gzip header of a gz_stream opened for reading. Set the stream mode
+- * to transparent if the gzip magic header is not present; set s->err to
+- * Z_DATA_ERROR if the magic header is present but the rest of the header is
+- * incorrect. */
+-static int
+-skip_gzip_header(z_stream *stream)
+-{
+-	unsigned int len;
+-	int method; /* method byte */
+-	int flags;  /* flags byte */
+-
+-	/* Check the gzip magic header */
+-	for (len = 0; len < 2; len++) {
+-		int byte = get_gzip_byte(stream);
+-
+-		if (byte != gzip_header_magic[len]) {
+-			if (len != 0) {
+-				stream->avail_in++;
+-				stream->next_in--;
+-			}
+-
+-			if (byte != EOF) {
+-				stream->avail_in++;
+-				stream->next_in--;
+-			}
+-
+-			return stream->avail_in != 0 ? Z_OK : Z_STREAM_END;
+-		}
+-	}
+-
+-	method = get_gzip_byte(stream);
+-	flags = get_gzip_byte(stream);
+-
+-	if (method != Z_DEFLATED || (flags & GZIP_RESERVED) != 0)
+-		return Z_DATA_ERROR;
+-
+-	/* Discard time, xflags and OS code: */
+-	skip_gzip_bytes(stream, 6);
+-
+-	if (flags & GZIP_EXTRA_FIELD) {
+-		/* Skip the extra field */
+-		len  =  (unsigned int) get_gzip_byte(stream);
+-		len += ((unsigned int) get_gzip_byte(stream)) << 8;
+-
+-		/* If EOF is encountered @len is garbage, but the loop below
+-		 * will quit anyway. */
+-		while (len-- > 0 && get_gzip_byte(stream) != EOF) ;
+-	}
+-
+-	/* Skip the original file name */
+-	if (flags & GZIP_ORIG_NAME)
+-		skip_gzip_string(stream);
+-
+-	/* Skip the .gz file comment */
+-	if (flags & GZIP_COMMENT)
+-		skip_gzip_string(stream);
+-
+-	/* Skip the header CRC */
+-	if (flags & GZIP_HEADER_CRC)
+-		skip_gzip_bytes(stream, 2);
+-
+-	return Z_OK;
+-}
+-
+-
+-/* Freaking dammit. This is impossible for me to get working. */
+-static unsigned char *
+-gzip_decode_buffer(unsigned char *data, int len, int *new_len)
+-{
+-	unsigned char *buffer = NULL;
+-	int error = Z_OK;
+-	int tries, wbits;
+-
+-	/* This WBITS loop thing was something I got from
+-	 * http://lists.infradead.org/pipermail/linux-mtd/2002-March/004429.html
+-	 * but it doesn't fix it. :/ --jonas */
+-	/* -MAX_WBITS impiles -> suppress zlib header and adler32.  try first
+-	 * with -MAX_WBITS, if that fails, try MAX_WBITS to be backwards
+-	 * compatible */
+-	wbits = -MAX_WBITS;
+-
+-	for (tries = 0; tries < 2; tries++) {
+-		z_stream stream;
+-
+-		memset(&stream, 0, sizeof(z_stream));
+-
+-		/* FIXME: Use inflateInit2() to configure low memory
+-		 * usage for CONFIG_SMALL configurations. --jonas */
+-		error = inflateInit2(&stream, wbits);
+-		if (error != Z_OK) break;
+-
+-		stream.next_in = (char *)data;
+-		stream.avail_in = len;
+-
+-		error = skip_gzip_header(&stream);
+-		if (error != Z_OK) {
+-			stream.next_in = (char *)data;
+-			stream.avail_in = len;
+-		}
+-
+-		do {
+-			unsigned char *new_buffer;
+-			size_t size = stream.total_out + MAX_STR_LEN;
+-
+-			assert(stream.total_out >= 0);
+-			assert(stream.next_in);
+-
+-			new_buffer = mem_realloc(buffer, size);
+-			if (!new_buffer) {
+-				error = Z_MEM_ERROR;
+-				break;
+-			}
+-
+-			buffer		 = new_buffer;
+-			stream.next_out  = buffer + stream.total_out;
+-			stream.avail_out = MAX_STR_LEN;
+-
+-			error = inflate(&stream, Z_NO_FLUSH);
+-			if (error == Z_STREAM_END) {
+-				/* Here gzio.c has some detection of
+-				 * concatenated .gz files and will do a gzip
+-				 * header skip and an inflateReset() call
+-				 * before continuing. It partly uses CRC to
+-				 * detect that. */
+-				*new_len = stream.total_out;
+-				error = Z_OK;
+-				break;
+-			}
+-
+-		} while (error == Z_OK && stream.avail_in > 0);
+-
+-		inflateEnd(&stream);
+-
+-		if (error != Z_DATA_ERROR)
+-			break;
+-
+-		/* Try again with next wbits */
+-		wbits = -wbits;
+-	}
+-
+-	if (error != Z_OK) {
+-		if (buffer) mem_free(buffer);
+-		*new_len = 0;
+-		return NULL;
+-	}
+-
+-	return buffer;
+-}
+-
+-
+-static void
+-gzip_close(struct stream_encoded *stream)
+-{
+-	gzclose((gzFile *) stream->data);
+-}
+-
+-static unsigned char *gzip_extensions[] = { ".gz", ".tgz", NULL };
+-
+-struct decoding_backend gzip_decoding_backend = {
+-	"gzip",
+-	gzip_extensions,
+-	gzip_open,
+-	gzip_read,
+-	gzip_decode,
+-	gzip_decode_buffer,
+-	gzip_close,
+-};
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/gzip.h elinks-0.11.4rc0/src/encoding/gzip.h
+--- elinks-0.11.4rc0-orig/src/encoding/gzip.h	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/gzip.h	1970-01-01 01:00:00.000000000 +0100
+@@ -1,12 +0,0 @@
+-#ifndef EL__ENCODING_GZIP_H
+-#define EL__ENCODING_GZIP_H
+-
+-#include "encoding/encoding.h"
+-
+-#ifdef CONFIG_GZIP
+-extern struct decoding_backend gzip_decoding_backend;
+-#else
+-#define gzip_decoding_backend dummy_decoding_backend
+-#endif
+-
+-#endif
+diff -urNp elinks-0.11.4rc0-orig/src/encoding/Makefile elinks-0.11.4rc0/src/encoding/Makefile
+--- elinks-0.11.4rc0-orig/src/encoding/Makefile	2008-02-05 00:44:16.000000000 +0100
++++ elinks-0.11.4rc0/src/encoding/Makefile	2008-02-21 13:25:29.000000000 +0100
+@@ -2,7 +2,7 @@ top_builddir=../..
+ include $(top_builddir)/Makefile.config
+ 
+ OBJS-$(CONFIG_BZIP2)	+= bzip2.o
+-OBJS-$(CONFIG_GZIP)	+= gzip.o
++OBJS-$(CONFIG_GZIP)	+= deflate.o
+ 
+ OBJS = encoding.o
+ 
+diff -urNp elinks-0.11.4rc0-orig/src/protocol/http/http.c elinks-0.11.4rc0/src/protocol/http/http.c
+--- elinks-0.11.4rc0-orig/src/protocol/http/http.c	2008-02-21 13:19:57.000000000 +0100
++++ elinks-0.11.4rc0/src/protocol/http/http.c	2008-02-21 13:33:32.000000000 +0100
+@@ -762,7 +762,7 @@ http_send_header(struct socket *socket)
+ #endif
+ #endif
+ 
+-	add_to_string(&header, "gzip");
++	add_to_string(&header, "deflate, gzip");
+ #endif
+ 	add_crlf_to_string(&header);
+ #endif
+@@ -989,30 +989,24 @@ static unsigned char *
+ decompress_data(struct connection *conn, unsigned char *data, int len,
+ 		int *new_len)
+ {
+-	struct http_connection_info *http = conn->info;
+-	/* to_read is number of bytes to be read from the decoder. It is 65536
+-	 * (then we are just emptying the decoder buffer as we finished the walk
+-	 * through the incoming stream already) or PIPE_BUF / 2 (when we are
+-	 * still walking through the stream - then we write PIPE_BUF / 2 to the
+-	 * pipe and read it back to the decoder ASAP; the point is that we can't
+-	 * write more than PIPE_BUF to the pipe at once, but we also have to
+-	 * never let read_encoded() (gzread(), in fact) to empty the pipe - that
+-	 * causes further malfunction of zlib :[ ... so we will make sure that
+-	 * we will always have at least PIPE_BUF / 2 + 1 in the pipe (returning
+-	 * early otherwise)). */
+-	int to_read = PIPE_BUF / 2, did_read = 0;
++  	struct http_connection_info *http = conn->info;
++	enum { NORMAL, FINISHING } state = NORMAL;
++	int did_read = 0;
+ 	int *length_of_block;
+ 	unsigned char *output = NULL;
+ 
+-	length_of_block = (http->length == LEN_CHUNKED ? &http->chunk_remaining
+-						       : &http->length);
+-
+ #define BIG_READ 65536
+-	if (!*length_of_block) {
+-		/* Going to finish this decoding bussiness. */
+-		/* Some nicely big value - empty encoded output queue by reading
+-		 * big chunks from it. */
+-		to_read = BIG_READ;
++
++	if (http->length == LEN_CHUNKED) {
++		if (http->chunk_remaining == CHUNK_ZERO_SIZE)
++			state = FINISHING;
++		length_of_block = &http->chunk_remaining;
++	} else {
++		length_of_block = &http->length;
++		if (!*length_of_block) {
++			/* Going to finish this decoding bussiness. */
++			state = FINISHING;
++		}
+ 	}
+ 
+ 	if (conn->content_encoding == ENCODING_NONE) {
+@@ -1031,14 +1025,11 @@ decompress_data(struct connection *conn,
+ 	}
+ 
+ 	do {
+-		int init = 0;
+-
+-		if (to_read == PIPE_BUF / 2) {
++		if (state == NORMAL) {
+ 			/* ... we aren't finishing yet. */
+-			int written = safe_write(conn->stream_pipes[1], data,
+-						 len > to_read ? to_read : len);
++			int written = safe_write(conn->stream_pipes[1], data, len);
+ 
+-			if (written > 0) {
++			if (written >= 0) {
+ 				data += written;
+ 				len -= written;
+ 
+@@ -1049,7 +1040,7 @@ decompress_data(struct connection *conn,
+ 				 * non-keep-alive and chunked */
+ 				if (!http->length) {
+ 					/* That's all, folks - let's finish this. */
+-					to_read = BIG_READ;
++					state = FINISHING;
+ 				} else if (!len) {
+ 					/* We've done for this round (but not done
+ 					 * completely). Thus we will get out with
+@@ -1068,25 +1059,21 @@ decompress_data(struct connection *conn,
+ 			conn->stream = open_encoded(conn->stream_pipes[0],
+ 					conn->content_encoding);
+ 			if (!conn->stream) return NULL;
+-			/* On "startup" pipe is treated with care, but if everything
+-			 * was already written to the pipe, caution isn't necessary */
+-			else if (to_read != BIG_READ) init = 1;
+-		} else init = 0;
++		}
+ 
+-		output = (unsigned char *) mem_realloc(output, *new_len + to_read);
++		output = (unsigned char *) mem_realloc(output, *new_len + BIG_READ);
+ 		if (!output) break;
+ 
+-		did_read = read_encoded(conn->stream, output + *new_len,
+-					init ? PIPE_BUF / 32 : to_read); /* on init don't read too much */
++		did_read = read_encoded(conn->stream, output + *new_len, BIG_READ);
++
+ 		if (did_read > 0) *new_len += did_read;
+-		else if (did_read == -1) {
+-			mem_free_set(&output, NULL);
+-			*new_len = 0;
+-			break; /* Loop prevention (bug 517), is this correct ? --Zas */
++		else {
++			if (did_read < 0) state = FINISHING;
++			break;
+ 		}
+-	} while (len || did_read == BIG_READ);
++	} while (len || (did_read == BIG_READ));
+ 
+-	shutdown_connection_stream(conn);
++	if (state == FINISHING) shutdown_connection_stream(conn);
+ 	return output;
+ }
+ 
+@@ -1213,11 +1200,9 @@ read_chunked_http_data(struct connection
+ 		} else {
+ 			unsigned char *data;
+ 			int data_len;
+-			int len;
+ 			int zero = (http->chunk_remaining == CHUNK_ZERO_SIZE);
+-
+-			if (zero) http->chunk_remaining = 0;
+-			len = http->chunk_remaining;
++      int len = zero ? 0 : http->chunk_remaining;
++		
+ 
+ 			/* Maybe everything necessary didn't come yet.. */
+ 			int_upper_bound(&len, rb->length);
+@@ -1858,6 +1843,8 @@ again:
+ 		if (file_encoding != ENCODING_GZIP
+ 		    && (!strcasecmp(d, "gzip") || !strcasecmp(d, "x-gzip")))
+ 		    	conn->content_encoding = ENCODING_GZIP;
++		if (!strcasecmp(d, "deflate") || !strcasecmp(d, "x-deflate"))
++			conn->content_encoding = ENCODING_DEFLATE;
+ #endif
+ #ifdef BUG_517
+ #ifdef CONFIG_BZIP2
+@@ -1874,8 +1861,7 @@ again:
+ 		conn->cached->encoding_info = stracpy(get_encoding_name(conn->content_encoding));
+ 	}
+ 
+-	if (http->length == -1
+-	    || (PRE_HTTP_1_1(http->recv_version) && http->close))
++	if (http->length == -1 || http->close)
+ 		socket->state = SOCKET_END_ONCLOSE;
+ 
+ 	read_http_data(socket, rb);
