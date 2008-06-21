@@ -1,11 +1,11 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.11.4
-Release:   0.4.rc1%{?dist}
+Release:   1%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}rc1.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
@@ -37,7 +37,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}rc1
+%setup -q -n %{name}-%{version}
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -88,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Sat Jun 21 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-1
+- new stable upstream release
+
 * Thu Mar  6 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-0.4.rc1
 - new upstream release candidate marked stable
 
