@@ -1,11 +1,11 @@
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.11.4
-Release:   1%{?dist}
+Version:   0.12
+Release:   0.1.pre1%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}pre1.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
@@ -13,6 +13,7 @@ BuildRequires: openssl-devel
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: libidn-devel
+Requires: zlib >= 1.2.0.2
 
 Provides:  webclient
 Obsoletes: links
@@ -26,9 +27,7 @@ Patch3: elinks-0.11.0-getaddrinfo.patch
 Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
-Patch7: elinks-0.11.1-negotiate.patch
-Patch8: elinks-0.11.3-macropen.patch
-Patch9: elinks-0.11.4rc0-chunkedgzip.patch
+Patch7: elinks-0.11.3-macropen.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -37,7 +36,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n %{name}-%{version}pre1
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -52,12 +51,8 @@ quickly and swiftly displays Web pages.
 %patch5 -p1
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1
-# Fix #194096 – elinks should support negotiate-auth
-%patch7 -p1
 # fix for open macro in new glibc 
-%patch8 -p1
-# fix for broken gzip compression for chunked pages
-%patch9 -p1
+%patch7 -p1
 
 %build
 ./autogen.sh
@@ -88,6 +83,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jul  1 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.1.pre1
+- unstable elinks-0.12 pre1, solves several long-term issues 
+  unsolvable (or very hard to solve) in 0.11.4 (like #173411),
+  in general is elinks-0.12pre1 considered better than 0.11.4
+- dropped patches negotiate-auth, chunkedgzip - included in 0.12pre1,
+  modified few others due source code changes
+
 * Sat Jun 21 2008 Ondrej Vasik <ovasik@redhat.com> 0.11.4-1
 - new stable upstream release
 

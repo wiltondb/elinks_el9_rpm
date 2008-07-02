@@ -4,7 +4,7 @@
  };
  
  #define INIT_OPTION(name, flags, type, min, max, value, desc, capt) \
--	{ NULL_LIST_HEAD, INIT_OBJECT("option"), name, flags, type, min, max, { (struct list_head *) (value) }, desc, capt }
+-	{ NULL_LIST_HEAD, INIT_OBJECT("option"), name, flags, type, min, max, { (LIST_OF(struct option) *) (value) }, desc, capt }
 +	{ NULL_LIST_HEAD, INIT_OBJECT("option"), name, flags, type, min, max, { value }, desc, capt }
  
  extern struct option *config_options;

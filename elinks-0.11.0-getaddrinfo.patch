@@ -7,7 +7,7 @@
 +	hint.ai_flags = AI_ADDRCONFIG;
  	hint.ai_family = AF_UNSPEC;
  	hint.ai_socktype = SOCK_STREAM;
--	if (getaddrinfo(name, NULL, &hint, &ai) != 0) return -1;
+-	if (getaddrinfo(name, NULL, &hint, &ai) != 0) return DNS_ERROR;
 +	switch (getaddrinfo(name, NULL, &hint, &ai))
 +	{
 +	case 0:
@@ -18,7 +18,7 @@
 +			break;
 +		/* fall through */
 +	default:
-+		return -1;
++		return DNS_ERROR;
 +	}
  
  #else
