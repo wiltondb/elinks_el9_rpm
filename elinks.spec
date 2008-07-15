@@ -1,3 +1,4 @@
+%define _default_patch_fuzz 2
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
