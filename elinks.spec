@@ -1,8 +1,7 @@
-%define _default_patch_fuzz 2
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.2.pre1%{?dist}
+Release:   0.3.pre1%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -87,6 +86,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jul 15 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.3.pre1
+- get rid off fuzz in patches
+
 * Tue Jul 15 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.2.pre1
 - fix a crash when opening tab during page reload
 

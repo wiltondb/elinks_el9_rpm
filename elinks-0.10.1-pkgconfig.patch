@@ -19,4 +19,4 @@
 +	fi
  
  	if test "$cf_result" != yes; then
- 		if test "$withval" = yes; then
+ 		if test -n "$openssl_withval" && test "x$openssl_withval" != xno; then
