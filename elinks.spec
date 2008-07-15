@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.1.pre1%{?dist}
+Release:   0.2.pre1%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -28,6 +28,7 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
+Patch8: elinks-0.12pre1-tabreload.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -53,6 +54,8 @@ quickly and swiftly displays Web pages.
 %patch6 -p1
 # fix for open macro in new glibc 
 %patch7 -p1
+# upstream fix for opening tab during reload
+%patch8 -p1
 
 %build
 ./autogen.sh
@@ -83,6 +86,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Jul 15 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.2.pre1
+- fix a crash when opening tab during page reload
+
 * Tue Jul  1 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.1.pre1
 - unstable elinks-0.12 pre1, solves several long-term issues 
   unsolvable (or very hard to solve) in 0.11.4 (like #173411),

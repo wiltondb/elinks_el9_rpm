@@ -1,0 +1,42 @@
+Fix crash after a tab was opened during reload.
+
+---
+commit b07fecc2be6eeb7e20e555f6128e50f1ed4ee7f9
+tree 5df3f87ddb3ed9bae1126009cd755f7137c89cf6
+parent 6b05cdb3a0a12e8cf8bae3860b1a59e86d3076a1
+author Kalle Olavi Niemitalo <kon@iki.fi> Tue, 15 Jul 2008 00:09:27 +0300
+committer Kalle Olavi Niemitalo <Kalle@Astalo.kon.iki.fi> Tue, 15 Jul 2008 00:09:27 +0300
+
+ NEWS                 |    2 ++
+ src/viewer/text/vs.c |    6 ++++++
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/NEWS b/NEWS
+index b01a90a..7108a8e 100644
+--- a/NEWS
++++ b/NEWS
+@@ -44,6 +44,8 @@
+ 
+ Miscellaneous:
+ 
++* critical: Fix crash after a tab was opened during reload.  This was
++  triggered by the bug 620 fix in ELinks 0.12pre1.
+ * critical bug 723: fix dangling pointer crash when following a link
+   in a frame
+ * critical bug 756: ``assertion (cached)->object.refcount >= 0 failed''
+diff --git a/src/viewer/text/vs.c b/src/viewer/text/vs.c
+index d0bbdf5..a7978db 100644
+--- a/src/viewer/text/vs.c
++++ b/src/viewer/text/vs.c
+@@ -79,6 +79,12 @@ copy_vs(struct view_state *dst, struct view_state *src)
+ 	dst->ecmascript_fragile = 1;
+ #endif
+ 
++	/* destroy_vs(vs) does mem_free_if(vs->form_info), so each
++	 * view_state must have its own form_info.  Normally we make a
++	 * copy below, but not if src->form_info_len is 0, which it
++	 * can be even if src->form_info is not NULL.  */
++	dst->form_info = NULL;
++
+ 	/* Clean as a baby. */
+ 	dst->doc_view = NULL;
