@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.3.pre1%{?dist}
+Release:   0.4.pre1%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -29,6 +29,8 @@ Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-0.12pre1-tabreload.patch
+Patch9: elinks-0.12-bittorrent.patch
+Patch10: elinks-scroll.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -56,6 +58,10 @@ quickly and swiftly displays Web pages.
 %patch7 -p1
 # upstream fix for opening tab during reload
 %patch8 -p1
+#upstream fix for bittorrent
+%patch9 -p1
+#upstream fix for out of screen dialogs
+%patch10 -p1
 
 %build
 ./autogen.sh
@@ -86,6 +92,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Sep  1 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.4.pre1
+- upstream fix for bittorrent protocol
+- upstream fix for out of screen bittorrent dialog texts
+
 * Tue Jul 15 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.3.pre1
 - get rid off fuzz in patches
 
