@@ -1,11 +1,11 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.4.pre1%{?dist}
+Release:   0.5.pre2%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}pre1.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}pre2.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
@@ -28,9 +28,7 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
-Patch8: elinks-0.12pre1-tabreload.patch
-Patch9: elinks-0.12-bittorrent.patch
-Patch10: elinks-scroll.patch
+Patch8: elinks-scroll.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -39,7 +37,7 @@ advantage over graphical browsers is its speed--Links starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}pre1
+%setup -q -n %{name}-%{version}pre2
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -56,12 +54,8 @@ quickly and swiftly displays Web pages.
 %patch6 -p1
 # fix for open macro in new glibc 
 %patch7 -p1
-# upstream fix for opening tab during reload
-%patch8 -p1
-#upstream fix for bittorrent
-%patch9 -p1
 #upstream fix for out of screen dialogs
-%patch10 -p1
+%patch8 -p1
 
 %build
 ./autogen.sh
@@ -92,6 +86,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Sep 29 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.5.pre2
+- new upstream bugfix prerelease
+- Removed already applied patches for tabreload and bittorrent
+
 * Mon Sep  1 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.4.pre1
 - upstream fix for bittorrent protocol
 - upstream fix for out of screen bittorrent dialog texts
