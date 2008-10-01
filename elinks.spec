@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.5.pre2%{?dist}
+Release:   0.6.pre2%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -13,6 +13,7 @@ BuildRequires: openssl-devel
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: libidn-devel
+BuildRequires: nss_compat_ossl-devel >= 0.9.3
 Requires: zlib >= 1.2.0.2
 
 Provides:  webclient
@@ -29,6 +30,7 @@ Patch5: elinks-0.10.1-xterm.patch
 Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-scroll.patch
+Patch9: elinks-nss.patch
 
 %description
 Links is a text-based Web browser. Links does not display any images,
@@ -56,13 +58,15 @@ quickly and swiftly displays Web pages.
 %patch7 -p1
 #upstream fix for out of screen dialogs
 %patch8 -p1
+# Port elinks to use NSS library for cryptography (#346861)
+%patch9 -p1
 
 %build
 ./autogen.sh
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
-  --enable-bittorrent
+  --enable-bittorrent --with-nss_compat_ossl
 make %{?_smp_mflags}
 
 %install
@@ -86,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Oct  1 2008 Kamil Dudka <kdudka@redhat.com> 0.12-0.6.pre2
+- port elinks to use NSS library for cryptography (#346861)
+
 * Mon Sep 29 2008 Ondrej Vasik <ovasik@redhat.com> 0.12-0.5.pre2
 - new upstream bugfix prerelease
 - Removed already applied patches for tabreload and bittorrent
