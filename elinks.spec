@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.6.pre2%{?dist}
+Release:   0.7.pre2%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -17,8 +17,8 @@ BuildRequires: nss_compat_ossl-devel >= 0.9.3
 Requires: zlib >= 1.2.0.2
 
 Provides:  webclient
-Obsoletes: links
-Provides:  links
+Obsoletes: links < 1:%{version}-%{release}
+Provides:  links = 1:%{version}-%{release}
 Provides: text-www-browser
 
 Patch0: elinks-0.11.0-ssl-noegd.patch
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Jan 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.7.pre2
+- versioned obsoletes and provides for links
+
 * Wed Oct  1 2008 Kamil Dudka <kdudka@redhat.com> 0.12-0.6.pre2
 - port elinks to use NSS library for cryptography (#346861)
 
