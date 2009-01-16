@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.7.pre2%{?dist}
+Release:   0.8.pre2%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Jan 16 2009 Tomas Mraz <tmraz@redhat.com> 0.12-0.8.pre2
+- rebuild with new openssl
+
 * Wed Jan 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.7.pre2
 - versioned obsoletes and provides for links
 
