@@ -75,6 +75,8 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
+touch $RPM_BUILD_ROOT%{_bindir}/links
+touch $RPM_BUILD_ROOT%{_mandir}/man1/links.1.gz
 %find_lang elinks
 
 %postun
@@ -108,9 +110,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -f elinks.lang
 %defattr(-,root,root)
 %doc README SITES TODO COPYING
-%ghost %{_bindir}/links
+%ghost %verify(not md5 size mtime) %{_bindir}/links
 %{_bindir}/elinks
-%ghost %{_mandir}/man1/links.1*
+%ghost %verify(not md5 size mtime) %{_mandir}/man1/links.1.gz
 %{_mandir}/man1/elinks.1*
 %{_mandir}/man5/*
 
