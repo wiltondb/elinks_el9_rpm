@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.9.pre2%{?dist}
+Release:   0.10.pre2%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -15,10 +15,12 @@ BuildRequires: expat-devel
 BuildRequires: libidn-devel
 BuildRequires: nss_compat_ossl-devel >= 0.9.3
 Requires: zlib >= 1.2.0.2
-
+Requires(preun): %{_sbindir}/alternatives
+Requires(post): %{_sbindir}/alternatives
+Requires(postun): %{_sbindir}/alternatives
 Provides:  webclient
-Obsoletes: links < 1:%{version}-%{release}
-Provides:  links = 1:%{version}-%{release}
+Obsoletes: links < 1:0.97
+Provides:  links = 1:0.97-1
 Provides: text-www-browser
 
 Patch0: elinks-0.11.0-ssl-noegd.patch
@@ -54,7 +56,7 @@ quickly and swiftly displays Web pages.
 %patch5 -p1
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1
-# fix for open macro in new glibc 
+# fix for open macro in new glibc
 %patch7 -p1
 #upstream fix for out of screen dialogs
 %patch8 -p1
@@ -72,10 +74,33 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-ln -s elinks $RPM_BUILD_ROOT%{_bindir}/links
-ln -s elinks.1 $RPM_BUILD_ROOT%{_mandir}/man1/links.1
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
 %find_lang elinks
+
+%postun
+if [ "$1" -ge "1" ]; then
+	links=`readlink %{_sysconfdir}/alternatives/links`
+	if [ "$links" == "%{_bindir}/elinks" ]; then
+		%{_sbindir}/alternatives --set links %{_bindir}/elinks
+	fi
+fi
+exit 0
+
+%post
+#Set up alternatives files for links
+%{_sbindir}/alternatives --install %{_bindir}/links links %{_bindir}/elinks 90 \
+  --slave %{_mandir}/man1/links.1.gz links-man %{_mandir}/man1/elinks.1.gz
+links=`readlink %{_sysconfdir}/alternatives/links`
+if [ "$links" == "%{_bindir}/elinks" ]; then
+	%{_sbindir}/alternatives --set links %{_bindir}/elinks
+fi
+
+
+%preun
+if [ $1 = 0 ]; then
+	%{_sbindir}/alternatives --remove links %{_bindir}/elinks
+fi
+exit 0
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -83,20 +108,24 @@ rm -rf $RPM_BUILD_ROOT
 %files -f elinks.lang
 %defattr(-,root,root)
 %doc README SITES TODO COPYING
-%{_bindir}/links
+%ghost %{_bindir}/links
 %{_bindir}/elinks
-%{_mandir}/man1/links.1*
+%ghost %{_mandir}/man1/links.1*
 %{_mandir}/man1/elinks.1*
 %{_mandir}/man5/*
 
 %changelog
+* Wed Mar 25 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.10.pre2
+- use better obsoletes/provides for links, use alternatives for
+  links manpage and binary(#470703)
+
 * Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.9.pre2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
 * Fri Jan 16 2009 Tomas Mraz <tmraz@redhat.com> 0.12-0.8.pre2
 - rebuild with new openssl
 
-* Wed Jan 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.7.pre2
+* Wed Jan 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.7.pre2
 - versioned obsoletes and provides for links
 
 * Wed Oct  1 2008 Kamil Dudka <kdudka@redhat.com> 0.12-0.6.pre2
