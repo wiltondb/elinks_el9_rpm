@@ -1,7 +1,7 @@
-diff -ruNp elinks-0.12pre2.orig/configure.in elinks-0.12pre2/configure.in
---- elinks-0.12pre2.orig/configure.in	2008-10-01 10:38:34.000000000 +0200
-+++ elinks-0.12pre2/configure.in	2008-10-01 10:39:43.000000000 +0200
-@@ -949,6 +949,7 @@ gnutls_withval="$withval"
+diff -ruNp elinks-0.12pre3.orig/configure.in elinks-0.12pre3/configure.in
+--- elinks-0.12pre3.orig/configure.in	2009-03-30 15:31:31.000000000 +0200
++++ elinks-0.12pre3/configure.in	2009-03-30 15:31:31.000000000 +0200
+@@ -1014,6 +1014,7 @@ gnutls_withval="$withval"
  
  if test "$enable_gnutls" = yes; then
  	disable_openssl=yes;
@@ -9,8 +9,8 @@ diff -ruNp elinks-0.12pre2.orig/configure.in elinks-0.12pre2/configure.in
  fi
  
  AC_ARG_WITH(openssl, [  --without-openssl       disable OpenSSL support],
-@@ -956,6 +957,37 @@ AC_ARG_WITH(openssl, [  --without-openss
- AC_ARG_WITH(openssl, [  --with-openssl[=DIR]    enable OpenSSL support (default)])
+@@ -1021,6 +1022,37 @@ AC_ARG_WITH(openssl, [  --without-openss
+ AC_ARG_WITH(openssl, [[  --with-openssl[=DIR]    enable OpenSSL support (default)]])
  openssl_withval="$withval"
  
 +AC_ARG_WITH(nss_compat_ossl, [[  --with-nss_compat_ossl[=DIR]
@@ -47,7 +47,7 @@ diff -ruNp elinks-0.12pre2.orig/configure.in elinks-0.12pre2/configure.in
  # ---- OpenSSL
  
  AC_MSG_CHECKING([for OpenSSL])
-@@ -1078,10 +1110,11 @@ AC_MSG_RESULT($cf_result)
+@@ -1143,10 +1175,11 @@ AC_MSG_RESULT($cf_result)
  
  # Final SSL setup
  
@@ -175,29 +175,30 @@ diff -ruNp elinks-0.12pre2.orig/src/network/ssl/ssl.c elinks-0.12pre2/src/networ
  
  #ifndef PATH_MAX
  #define	PATH_MAX	256 /* according to my /usr/include/bits/posix1_lim.h */
-@@ -71,12 +75,26 @@ static struct option_info openssl_option
- 		 N_("Enable or not the sending of X509 client certificates\n"
- 		    "to servers which request them.")),
+@@ -71,12 +75,27 @@ static struct option_info openssl_option
+ 		N_("Enable or not the sending of X509 client certificates "
+ 		"to servers which request them.")),
  
 +#ifdef CONFIG_NSS_COMPAT_OSSL
 +	INIT_OPT_STRING("connection.ssl.client_cert", N_("Certificate nickname"),
 +		"nickname", 0, "",
-+		 N_("The nickname of the client certificate stored in NSS\n"
-+		    "database. If this value is unset, the nickname from\n"
-+		    "the X509_CLIENT_CERT variable is used instead. If you\n"
-+		    "have a PKCS#12 file containing client certificate, you\n"
-+		    "can import it into your NSS database with:\n"
-+		    "$ pk12util -i mycert.p12 -d /path/to/database\n\n"
-+		    "The NSS database location can be changed by SSL_DIR\n"
-+		    "environment variable. The database can be also shared\n"
++		 N_("The nickname of the client certificate stored in NSS "
++		    "database. If this value is unset, the nickname from "
++		    "the X509_CLIENT_CERT variable is used instead. If you "
++		    "have a PKCS#12 file containing client certificate, you "
++		    "can import it into your NSS database with: "
++		    "$ pk12util -i mycert.p12 -d /path/to/database "
++       " "
++		    "The NSS database location can be changed by SSL_DIR "
++		    "environment variable. The database can be also shared "
 +		    "with Mozilla browsers.")),
 +#else
  	INIT_OPT_STRING("connection.ssl.client_cert", N_("Certificate File"),
  		"file", 0, "",
- 		 N_("The location of a file containing the client certificate\n"
- 		    "and unencrypted private key in PEM format. If unset, the\n"
- 		    "file pointed to by the X509_CLIENT_CERT variable is used\n"
- 		    "instead.")),
+ 		N_("The location of a file containing the client certificate "
+ 		"and unencrypted private key in PEM format. If unset, the "
+ 		"file pointed to by the X509_CLIENT_CERT variable is used "
+ 		"instead.")),
 +#endif
  
  	NULL_OPTION_INFO,
