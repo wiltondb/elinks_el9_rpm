@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.11.pre3%{?dist}
+Release:   0.12.pre3%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -35,9 +35,9 @@ Patch8: elinks-scroll.patch
 Patch9: elinks-nss.patch
 
 %description
-Links is a text-based Web browser. Links does not display any images,
-but it does support frames, tables and most other HTML tags. Links'
-advantage over graphical browsers is its speed--Links starts and exits
+Elinks is a text-based Web browser. Elinks does not display any images,
+but it does support frames, tables and most other HTML tags. Elinks'
+advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
@@ -117,6 +117,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Apr 03 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.12.pre3
+- use word Elinks instead of Links in package description
+
 * Mon Mar 30 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.11.pre3
 - new upstream bugfix prerelease
 - defuzz patches

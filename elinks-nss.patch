@@ -188,7 +188,7 @@ diff -ruNp elinks-0.12pre2.orig/src/network/ssl/ssl.c elinks-0.12pre2/src/networ
 +		    "have a PKCS#12 file containing client certificate, you "
 +		    "can import it into your NSS database with: "
 +		    "$ pk12util -i mycert.p12 -d /path/to/database "
-+       " "
++		    " "
 +		    "The NSS database location can be changed by SSL_DIR "
 +		    "environment variable. The database can be also shared "
 +		    "with Mozilla browsers.")),
