@@ -9,10 +9,10 @@ Source:    http://elinks.or.cz/download/elinks-%{version}pre3.tar.bz2
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
-BuildRequires: openssl-devel
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: libidn-devel
+BuildRequires: krb5-devel
 BuildRequires: nss_compat_ossl-devel >= 0.9.3
 Requires: zlib >= 1.2.0.2
 Requires(preun): %{_sbindir}/alternatives
