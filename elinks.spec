@@ -14,6 +14,8 @@ BuildRequires: expat-devel
 BuildRequires: libidn-devel
 BuildRequires: krb5-devel
 BuildRequires: nss_compat_ossl-devel >= 0.9.3
+BuildRequires: nss-devel
+BuildRequires: pkgconfig
 Requires: zlib >= 1.2.0.2
 Requires(preun): %{_sbindir}/alternatives
 Requires(post): %{_sbindir}/alternatives
