@@ -1,11 +1,12 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.13.pre3%{?dist}
+Release:   0.14.pre3%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
 Source:    http://elinks.or.cz/download/elinks-%{version}pre3.tar.bz2
+Source2:   elinks.conf
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
@@ -80,6 +81,8 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
+install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/elinks.conf
 touch $RPM_BUILD_ROOT%{_bindir}/links
 touch $RPM_BUILD_ROOT%{_mandir}/man1/links.1.gz
 %find_lang elinks
@@ -113,20 +116,25 @@ exit 0
 rm -rf $RPM_BUILD_ROOT
 
 %files -f elinks.lang
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %doc README SITES TODO COPYING
 %ghost %verify(not md5 size mtime) %{_bindir}/links
 %{_bindir}/elinks
 %ghost %verify(not md5 size mtime) %{_mandir}/man1/links.1.gz
+%config(noreplace) %{_sysconfdir}/elinks.conf
 %{_mandir}/man1/elinks.1*
 %{_mandir}/man5/*
 
 %changelog
+* Tue Apr 28 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.14.pre3
+- enable certificate verification by default via configuration
+  file(#495532)
+
 * Tue Apr 28 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.13.pre3
 - use appropriate BuildRequires for nss_compat_ossl (#495532)
 - support for trusted CA certificates loading from file in PEM format
 
-* Fri Apr 03 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.12.pre3
+* Fri Apr 03 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.12.pre3
 - use word Elinks instead of Links in package description
 
 * Mon Mar 30 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.11.pre3
