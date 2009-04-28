@@ -1,6 +1,6 @@
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.12
+Version:   0.13
 Release:   0.12.pre3%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
@@ -35,6 +35,7 @@ Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-scroll.patch
 Patch9: elinks-nss.patch
+Patch10: elinks-nss-inc.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -62,8 +63,10 @@ quickly and swiftly displays Web pages.
 %patch7 -p1
 #upstream fix for out of screen dialogs
 %patch8 -p1
-# Port elinks to use NSS library for cryptography (#346861)
+# Port elinks to use NSS library for cryptography (#346861) - accepted upstream
 %patch9 -p1
+# Port elinks to use NSS library for cryptography (#346861) - incremental patch
+%patch10 -p1
 
 %build
 ./autogen.sh
@@ -119,6 +122,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Apr 28 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.13.pre3
+- use appropriate BuildRequires for nss_compat_ossl (#495532)
+- support for trusted CA certificates loading from file in PEM format
+
 * Fri Apr 03 2009 Ondrej Vasik <ovasik@redhat.com> 0.12.0.12.pre3
 - use word Elinks instead of Links in package description
 
