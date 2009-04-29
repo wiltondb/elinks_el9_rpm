@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.14.pre3%{?dist}
+Release:   0.15.pre3%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -126,6 +126,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Apr 29 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.15.pre3
+- try to load default NSS root certificates if the configuration option
+  connection.ssl.trusted_ca_file is set to an empty string (#497788)
+
 * Tue Apr 28 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.14.pre3
 - enable certificate verification by default via configuration
   file(#495532)

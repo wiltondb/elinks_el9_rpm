@@ -1,7 +1,7 @@
 diff -ruNp elinks-0.12pre3.orig/src/network/ssl/ssl.c elinks-0.12pre3/src/network/ssl/ssl.c
---- elinks-0.12pre3.orig/src/network/ssl/ssl.c	2009-04-28 13:12:19.365660000 +0200
-+++ elinks-0.12pre3/src/network/ssl/ssl.c	2009-04-28 13:26:39.287600358 +0200
-@@ -48,10 +48,16 @@ SSL_CTX *context = NULL;
+--- elinks-0.12pre3.orig/src/network/ssl/ssl.c	2009-04-29 12:48:26.250878000 +0200
++++ elinks-0.12pre3/src/network/ssl/ssl.c	2009-04-29 13:03:51.318746893 +0200
+@@ -48,10 +48,20 @@ SSL_CTX *context = NULL;
  static void
  init_openssl(struct module *module)
  {
@@ -11,14 +11,18 @@ diff -ruNp elinks-0.12pre3.orig/src/network/ssl/ssl.c elinks-0.12pre3/src/networ
  	SSL_CTX_set_options(context, SSL_OP_ALL);
 +#ifdef CONFIG_NSS_COMPAT_OSSL
 +	ca_file = get_opt_str("connection.ssl.trusted_ca_file");
-+	SSL_CTX_load_verify_locations(context, ca_file, NULL);
++	if (*ca_file)
++		SSL_CTX_load_verify_locations(context, ca_file, NULL);
++	else
++		SSL_CTX_set_default_verify_paths(context);
 +#else
++	(void) ca_file;
  	SSL_CTX_set_default_verify_paths(context);
 +#endif
  }
  
  static void
-@@ -61,10 +67,27 @@ done_openssl(struct module *module)
+@@ -61,10 +71,30 @@ done_openssl(struct module *module)
  }
  
  static struct option_info openssl_options[] = {
@@ -33,6 +37,9 @@ diff -ruNp elinks-0.12pre3.orig/src/network/ssl/ssl.c elinks-0.12pre3/src/networ
 +		"trusted certification authorities in PEM format. "
 +		"ELinks then trusts certificates issued by these CAs.\n"
 +		"\n"
++		"If you set this option to an empty string, default NSS root"
++		"certificates are loaded.\n"
++		"\n"
 +		"If you change this option or the file, you must "
 +		"restart ELinks for the changes to take effect. "
 +		"This option affects GnuTLS and nss_compat_ossl but not "
@@ -46,7 +53,7 @@ diff -ruNp elinks-0.12pre3.orig/src/network/ssl/ssl.c elinks-0.12pre3/src/networ
  
  	INIT_OPT_TREE("connection.ssl", N_("Client Certificates"),
          	"client_cert", OPT_SORT,
-@@ -187,7 +210,8 @@ static struct option_info gnutls_options
+@@ -187,7 +217,8 @@ static struct option_info gnutls_options
  		"\n"
  		"If you change this option or the file, you must "
  		"restart ELinks for the changes to take effect. "
