@@ -1,22 +1,22 @@
---- elinks-0.10.1/configure.in.pkgconfig	2005-01-04 14:51:02.000000000 +0100
-+++ elinks-0.10.1/configure.in	2005-01-28 18:00:55.964204016 +0100
-@@ -655,6 +655,11 @@
- if test "$disable_openssl" = yes; then
- 	cf_result="not used"
+--- elinks-0.12pre4/configure.in.pkgconfig
++++ elinks-0.12pre4/configure.in
+@@ -1034,6 +1034,11 @@
+ 
  else
+ 	cf_result=no
 +	if pkg-config openssl ; then
 +		CFLAGS="$CFLAGS_X `pkg-config --cflags openssl`"
 +		LIBS="$LIBS_X `pkg-config --libs openssl`"
 +		cf_result=yes
 +	else
- 	for ssldir in "$openssl_withval" "" /usr /usr/local/openssl \
+ 	for ssldir in "$with_openssl" "" /usr /usr/local/openssl \
  			 /usr/lib/openssl /usr/local/ssl \
  			 /usr/local/www /usr/lib/ssl /usr/local \
-@@ -682,6 +687,7 @@
+@@ -1058,6 +1063,7 @@
  			fi
  		fi
  	done
 +	fi
  
  	if test "$cf_result" != yes; then
- 		if test -n "$openssl_withval" && test "x$openssl_withval" != xno; then
+ 		if test "${with_openssl-no}" != "no"; then

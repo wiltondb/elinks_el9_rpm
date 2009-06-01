@@ -1,11 +1,11 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.15.pre3%{?dist}
+Release:   0.16.pre4%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}pre3.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}pre4.tar.bz2
 Source2:   elinks.conf
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -45,7 +45,7 @@ advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}pre3
+%setup -q -n %{name}-%{version}pre4
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -126,6 +126,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Jun 01 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.16.pre4
+- new upstream bugfix prerelease
+- defuzz patches
+
 * Wed Apr 29 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.15.pre3
 - try to load default NSS root certificates if the configuration option
   connection.ssl.trusted_ca_file is set to an empty string (#497788)

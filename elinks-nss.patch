@@ -1,17 +1,9 @@
 diff -ruNp elinks-0.12pre3.orig/configure.in elinks-0.12pre3/configure.in
 --- elinks-0.12pre3.orig/configure.in	2009-04-28 12:19:38.816628000 +0200
 +++ elinks-0.12pre3/configure.in	2009-04-28 12:56:07.343999815 +0200
-@@ -1014,6 +1014,7 @@ gnutls_withval="$withval"
- 
- if test "$enable_gnutls" = yes; then
- 	disable_openssl=yes;
-+	with_nss_compat_ossl=no;
- fi
- 
- AC_ARG_WITH(openssl, [  --without-openssl       disable OpenSSL support],
 @@ -1021,6 +1022,37 @@ AC_ARG_WITH(openssl, [  --without-openss
- AC_ARG_WITH(openssl, [[  --with-openssl[=DIR]    enable OpenSSL support (default)]])
- openssl_withval="$withval"
+ 		*)	chosen_ssl_library="OpenSSL" ;;
+ 	     esac])
  
 +AC_ARG_WITH(nss_compat_ossl, [[  --with-nss_compat_ossl[=DIR]
 +                          NSS compatibility SSL libraries/include files]])
