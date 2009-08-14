@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.18.pre5%{?dist}
+Release:   0.19.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -19,7 +19,9 @@ BuildRequires: nss-devel
 BuildRequires: pkgconfig
 Requires: zlib >= 1.2.0.2
 Requires(preun): %{_sbindir}/alternatives
+Requires(post): coreutils
 Requires(post): %{_sbindir}/alternatives
+Requires(postun): coreutils
 Requires(postun): %{_sbindir}/alternatives
 Provides:  webclient
 Obsoletes: links < 1:0.97
@@ -126,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri Aug 14 2009 Orion Poplawski <orion@cora.nwra.com> 0.12-0.19.pre5
+- Add Requires(post/postun): coreutils for readlink
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.18.pre5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
