@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.19.pre5%{?dist}
+Release:   0.20.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -17,6 +17,7 @@ BuildRequires: krb5-devel
 BuildRequires: nss_compat_ossl-devel >= 0.9.3
 BuildRequires: nss-devel
 BuildRequires: pkgconfig
+BuildRequires: gpm-devel
 Requires: zlib >= 1.2.0.2
 Requires(preun): %{_sbindir}/alternatives
 Requires(post): coreutils
@@ -128,6 +129,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Mon Dec 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.20.pre5
+- Add buildrequires for gpm-devel to enable gpm support(#547064)
+
 * Fri Aug 14 2009 Orion Poplawski <orion@cora.nwra.com> 0.12-0.19.pre5
 - Add Requires(post/postun): coreutils for readlink
 
