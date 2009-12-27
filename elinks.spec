@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.20.pre5%{?dist}
+Release:   0.21.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -12,13 +12,16 @@ Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: automake
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
-BuildRequires: libidn-devel
+BuildRequires: gpm-devel
+BuildRequires: js-devel
 BuildRequires: krb5-devel
-BuildRequires: nss_compat_ossl-devel >= 0.9.3
+BuildRequires: libidn-devel
+BuildRequires: nss_compat_ossl-devel
+
+# nss-devel should be required by nss_compat_ossl-devel (#550770)
 BuildRequires: nss-devel
 BuildRequires: pkgconfig
-BuildRequires: gpm-devel
-Requires: zlib >= 1.2.0.2
+BuildRequires: zlib-devel
 Requires(preun): %{_sbindir}/alternatives
 Requires(post): coreutils
 Requires(post): %{_sbindir}/alternatives
@@ -77,7 +80,7 @@ quickly and swiftly displays Web pages.
 
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
-  --enable-bittorrent --with-nss_compat_ossl
+  --enable-bittorrent --with-nss_compat_ossl --enable-256-colors
 make %{?_smp_mflags}
 
 %install
@@ -129,6 +132,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Sun Dec 27 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.21.pre5
+- add buildrequires for js-devel (#550717) and zlib-devel
+- build support for 256 color terminal
+
 * Mon Dec 14 2009 Ondrej Vasik <ovasik@redhat.com> 0.12-0.20.pre5
 - Add buildrequires for gpm-devel to enable gpm support(#547064)
 
