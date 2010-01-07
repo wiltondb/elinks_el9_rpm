@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.21.pre5%{?dist}
+Release:   0.22.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -17,9 +17,6 @@ BuildRequires: js-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn-devel
 BuildRequires: nss_compat_ossl-devel
-
-# nss-devel should be required by nss_compat_ossl-devel (#550770)
-BuildRequires: nss-devel
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
 Requires(preun): %{_sbindir}/alternatives
@@ -34,7 +31,6 @@ Provides: text-www-browser
 
 Patch0: elinks-0.11.0-ssl-noegd.patch
 Patch1: elinks-0.10.1-utf_8_io-default.patch
-Patch2: elinks-0.10.1-pkgconfig.patch
 Patch3: elinks-0.11.0-getaddrinfo.patch
 Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
@@ -55,23 +51,31 @@ quickly and swiftly displays Web pages.
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
+
 # UTF-8 by default
 %patch1 -p1
-%patch2 -p1
+
 # Make getaddrinfo call use AI_ADDRCONFIG.
 %patch3 -p1
+
 # Don't put so much information in the user-agent header string (bug #97273).
 %patch4 -p1
+
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 %patch5 -p1
+
 # Fix #157300 - Strange behavior on ppc64
 %patch6 -p1
+
 # fix for open macro in new glibc
 %patch7 -p1
+
 #upstream fix for out of screen dialogs
 %patch8 -p1
+
 # Port elinks to use NSS library for cryptography (#346861) - accepted upstream
 %patch9 -p1
+
 # Port elinks to use NSS library for cryptography (#346861) - incremental patch
 %patch10 -p1
 
@@ -132,6 +136,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Jan 07 2010 Kamil Dudka <kdudka@redhat.com> - 0.12-0.22.pre5
+- remove patch for configure script to find OpenSSL (we use NSS now)
+- remove buildrequires for nss-devel (#550770)
+
 * Sun Dec 27 2009 Kamil Dudka <kdudka@redhat.com> 0.12-0.21.pre5
 - add buildrequires for js-devel (#550717) and zlib-devel
 - build support for 256 color terminal
