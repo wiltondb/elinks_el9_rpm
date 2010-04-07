@@ -92,12 +92,10 @@ export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
   --enable-bittorrent --with-nss_compat_ossl --enable-256-colors
 
-MOPTS="V=1"
-
 # uncomment to turn off optimizations
 #sed -i 's/-O2/-O0/' Makefile.config
-#MOPTS=
 
+MOPTS="V=1"
 if tty >/dev/null 2>&1; then
     # turn on fancy colorized output only when we have a TTY device
     MOPTS=
