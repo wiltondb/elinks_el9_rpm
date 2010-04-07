@@ -104,12 +104,12 @@ make %{?_smp_mflags} $MOPTS
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT V=1
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
 install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/elinks.conf
 touch $RPM_BUILD_ROOT%{_bindir}/links
-touch $RPM_BUILD_ROOT%{_mandir}/man1/links.1.gz
+true | gzip -c > $RPM_BUILD_ROOT%{_mandir}/man1/links.1.gz
 %find_lang elinks
 
 %postun
