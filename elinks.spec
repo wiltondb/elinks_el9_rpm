@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.22.pre5%{?dist}
+Release:   0.23.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -79,13 +79,30 @@ quickly and swiftly displays Web pages.
 # Port elinks to use NSS library for cryptography (#346861) - incremental patch
 %patch10 -p1
 
-%build
-./autogen.sh
+# remove bogus serial numbers
+sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
 
+# we need to recreate autotools files because of the NSS patch
+aclocal -I config/m4
+autoconf
+autoheader
+
+%build
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
   --enable-bittorrent --with-nss_compat_ossl --enable-256-colors
-make %{?_smp_mflags}
+
+MOPTS="V=1"
+
+# uncomment to turn off optimizations
+#sed -i 's/-O2/-O0/' Makefile.config
+#MOPTS=
+
+if tty >/dev/null 2>&1; then
+    # turn on fancy colorized output only when we have a TTY device
+    MOPTS=
+fi
+make %{?_smp_mflags} $MOPTS
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -136,6 +153,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Wed Apr 07 2010 Kamil Dudka <kdudka@redhat.com> - 0.12-0.23.pre5
+- do not print control characters to build logs
+- avoid aclocal warnings
+
 * Thu Jan 07 2010 Kamil Dudka <kdudka@redhat.com> - 0.12-0.22.pre5
 - remove patch for configure script to find OpenSSL (we use NSS now)
 - remove buildrequires for nss-devel (#550770)
