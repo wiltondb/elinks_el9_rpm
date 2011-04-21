@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.24.pre5%{?dist}
+Release:   0.25.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -39,6 +39,7 @@ Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-scroll.patch
 Patch9: elinks-nss.patch
 Patch10: elinks-nss-inc.patch
+Patch11: elinks-0.12pre5-js185.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -78,6 +79,9 @@ quickly and swiftly displays Web pages.
 
 # Port elinks to use NSS library for cryptography (#346861) - incremental patch
 %patch10 -p1
+
+# backported upstream commits f31cf6f and 2844f8b
+%patch11 -p1
 
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
@@ -151,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Thu Apr 21 2011 Kamil Dudka <kdudka@redhat.com> - 0.12-0.25.pre5
+- port to js-1.8.5 API (upstream commits f31cf6f and 2844f8b)
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.24.pre5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
