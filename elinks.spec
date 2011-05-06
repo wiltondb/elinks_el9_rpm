@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.25.pre5%{?dist}
+Release:   0.26.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -80,7 +80,7 @@ quickly and swiftly displays Web pages.
 # Port elinks to use NSS library for cryptography (#346861) - incremental patch
 %patch10 -p1
 
-# backported upstream commits f31cf6f and 2844f8b
+# backported upstream commits f31cf6f, 2844f8b, and 218a225
 %patch11 -p1
 
 # remove bogus serial numbers
@@ -155,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Fri May 06 2011 Kamil Dudka <kdudka@redhat.com> - 0.12-0.26.pre5
+- improve the js-1.8.5 patch (upstream commit 218a225)
+
 * Thu Apr 21 2011 Kamil Dudka <kdudka@redhat.com> - 0.12-0.25.pre5
 - port to js-1.8.5 API (upstream commits f31cf6f and 2844f8b)
 

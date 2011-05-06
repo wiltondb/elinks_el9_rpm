@@ -1,7 +1,7 @@
 From a3f59264b9504e8bf3d0ac70b99a237bc964089d Mon Sep 17 00:00:00 2001
 From: Miciah Dashiel Butler Masters <miciah.masters@gmail.com>
 Date: Sat, 18 Jul 2009 23:41:01 +0000
-Subject: [PATCH 1/2] Heartbeat code using JS_TriggerOperationCallback
+Subject: [PATCH 1/3] Heartbeat code using JS_TriggerOperationCallback
 
 Implement new heartbeat code to catch runaway execution of document
 ECMAScript code.  The old code uses JS_SetBranchCallback which is
@@ -378,7 +378,8 @@ index 0000000..f7c8b12
 From dcaff5d937d63888c560727dda5f5348fa59a366 Mon Sep 17 00:00:00 2001
 From: witekfl <witekfl@poczta.onet.pl>
 Date: Tue, 19 Apr 2011 22:41:05 +0200
-Subject: [PATCH 2/2] JS_VERSION at least 185 is required for ECMASCript (xulrunner-2.0 or later)
+Subject: [PATCH 2/3] JS_VERSION at least 185 is required for ECMASCript
+ (xulrunner-2.0 or later)
 
 The code wasn't tested. It compiles
 
@@ -2265,3 +2266,60 @@ index 64f43ca..636b37b 100644
 -- 
 1.7.4.2
 
+From 32109054ce40067b8c55837fb69f1bc1249e38fd Mon Sep 17 00:00:00 2001
+From: witekfl <witekfl@poczta.onet.pl>
+Date: Mon, 25 Apr 2011 21:04:03 +0200
+Subject: [PATCH 3/3] SpiderMonkey: fix issue with javascript:history.back()
+
+In history.back() and others set rval to NULL.
+Do not convert NULL to string in spidermoney_eval_stringback.
+
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/ecmascript/spidermonkey.c          |    2 +-
+ src/ecmascript/spidermonkey/location.c |    3 +++
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/src/ecmascript/spidermonkey.c b/src/ecmascript/spidermonkey.c
+index 021e6bd..5360455 100644
+--- a/src/ecmascript/spidermonkey.c
++++ b/src/ecmascript/spidermonkey.c
+@@ -303,7 +303,7 @@ spidermonkey_eval_stringback(struct ecmascript_interpreter *interpreter,
+ 	if (ret == JS_FALSE) {
+ 		return NULL;
+ 	}
+-	if (JSVAL_IS_VOID(rval)) {
++	if (JSVAL_IS_VOID(rval) || JSVAL_IS_NULL(rval)) {
+ 		/* Undefined value. */
+ 		return NULL;
+ 	}
+diff --git a/src/ecmascript/spidermonkey/location.c b/src/ecmascript/spidermonkey/location.c
+index 752a890..d1fbdfb 100644
+--- a/src/ecmascript/spidermonkey/location.c
++++ b/src/ecmascript/spidermonkey/location.c
+@@ -78,6 +78,7 @@ history_back(JSContext *ctx, uintN argc, jsval *rval)
+  * and return non zero for <a href="javascript:history.back()"> to prevent
+  * "calculating" new link. Returned value 2 is changed to 0 in function
+  * spidermonkey_eval_boolback */
++	JS_SET_RVAL(ctx, rval, JSVAL_NULL);
+ 	return 2;
+ }
+ 
+@@ -91,6 +92,7 @@ history_forward(JSContext *ctx, uintN argc, jsval *rval)
+ 
+ 	go_unback(ses);
+ 
++	JS_SET_RVAL(ctx, rval, JSVAL_NULL);
+ 	return 2;
+ }
+ 
+@@ -121,6 +123,7 @@ history_go(JSContext *ctx, uintN argc, jsval *rval)
+ 		index += index > 0 ? -1 : 1;
+ 	}
+ 
++	JS_SET_RVAL(ctx, rval, JSVAL_NULL);
+ 	return 2;
+ }
+ 
+-- 
+1.7.4.4
