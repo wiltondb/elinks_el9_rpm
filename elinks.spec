@@ -1,13 +1,12 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.29.pre5%{?dist}
+Release:   0.30.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
 Source:    http://elinks.or.cz/download/elinks-%{version}pre5.tar.bz2
 Source2:   elinks.conf
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: automake
 BuildRequires: bzip2-devel
@@ -107,7 +106,6 @@ fi
 make %{?_smp_mflags} $MOPTS
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT V=1
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
@@ -141,11 +139,7 @@ if [ $1 = 0 ]; then
 fi
 exit 0
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %files -f elinks.lang
-%defattr(-,root,root,-)
 %doc README SITES TODO COPYING
 %ghost %verify(not md5 size mtime) %{_bindir}/links
 %{_bindir}/elinks
@@ -155,6 +149,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/*
 
 %changelog
+* Tue Aug 28 2012 Kamil Dudka <kdudka@redhat.com> - 0.12-0.30.pre5
+- fix specfile issues reported by the fedora-review script
+
 * Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.29.pre5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
