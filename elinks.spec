@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.30.pre5%{?dist}
+Release:   0.31.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -39,6 +39,7 @@ Patch8: elinks-scroll.patch
 Patch9: elinks-nss.patch
 Patch10: elinks-nss-inc.patch
 Patch11: elinks-0.12pre5-js185.patch
+Patch12: elinks-0.12pre5-ddg-search.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -81,6 +82,9 @@ quickly and swiftly displays Web pages.
 
 # backported upstream commits f31cf6f, 2844f8b, 218a225, and 12803e4
 %patch11 -p1
+
+# add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
+%patch12 -p1
 
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
@@ -149,6 +153,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon Oct 08 2012 Kamil Dudka <kdudka@redhat.com> - 0.12-0.31.pre5
+- add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
+
 * Tue Aug 28 2012 Kamil Dudka <kdudka@redhat.com> - 0.12-0.30.pre5
 - fix specfile issues reported by the fedora-review script
 
