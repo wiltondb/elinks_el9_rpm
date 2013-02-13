@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.32.pre5%{?dist}
+Release:   0.33.pre5%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -157,6 +157,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.33.pre5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Fri Jan 04 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.32.pre5
 - do not delegate GSSAPI credentials (CVE-2012-4545)
 
