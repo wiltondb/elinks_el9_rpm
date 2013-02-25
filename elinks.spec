@@ -1,11 +1,13 @@
+%global prerel pre6
+
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.33.pre5%{?dist}
+Release:   0.34.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
-Source:    http://elinks.or.cz/download/elinks-%{version}pre5.tar.bz2
+Source:    http://elinks.or.cz/download/elinks-%{version}%{prerel}.tar.bz2
 Source2:   elinks.conf
 
 BuildRequires: automake
@@ -33,14 +35,13 @@ Patch1: elinks-0.10.1-utf_8_io-default.patch
 Patch3: elinks-0.11.0-getaddrinfo.patch
 Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
-Patch6: elinks-0.11.0-union.patch
 Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-scroll.patch
 Patch9: elinks-nss.patch
 Patch10: elinks-nss-inc.patch
 Patch11: elinks-0.12pre5-js185.patch
 Patch12: elinks-0.12pre5-ddg-search.patch
-Patch13: elinks-CVE-2012-4545.patch
+Patch13: elinks-0.12pre6-autoconf.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -49,7 +50,7 @@ advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}pre5
+%setup -q -n %{name}-%{version}%{prerel}
 
 # Prevent crash when HOME is unset (bug #90663).
 %patch0 -p1
@@ -65,9 +66,6 @@ quickly and swiftly displays Web pages.
 
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 %patch5 -p1
-
-# Fix #157300 - Strange behavior on ppc64
-%patch6 -p1
 
 # fix for open macro in new glibc
 %patch7 -p1
@@ -87,7 +85,7 @@ quickly and swiftly displays Web pages.
 # add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
 %patch12 -p1
 
-# CVE-2012-4545
+# add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
 %patch13 -p1
 
 # remove bogus serial numbers
@@ -101,7 +99,8 @@ autoheader
 %build
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
-  --enable-bittorrent --with-nss_compat_ossl --enable-256-colors
+  --enable-bittorrent --with-nss_compat_ossl --enable-256-colors \
+  --without-openssl --without-gnutls
 
 # uncomment to turn off optimizations
 #sed -i 's/-O2/-O0/' Makefile.config
@@ -157,6 +156,12 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon Feb 25 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.34.pre6
+- update to latest upstream pre-release
+- drop unneeded patches
+- fix autoconf warnings
+- explicitly disable using OpenSSL and GnuTLS
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.33.pre5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
