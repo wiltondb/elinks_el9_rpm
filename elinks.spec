@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.34.%{prerel}%{?dist}
+Release:   0.35.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -156,6 +156,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.35.pre6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Mon Feb 25 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.34.pre6
 - update to latest upstream pre-release
 - drop unneeded patches
