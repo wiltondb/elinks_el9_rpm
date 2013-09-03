@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.35.%{prerel}%{?dist}
+Release:   0.36.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -26,7 +26,6 @@ Requires(post): %{_sbindir}/alternatives
 Requires(postun): coreutils
 Requires(postun): %{_sbindir}/alternatives
 Provides:  webclient
-Obsoletes: links < 1:0.97
 Provides:  links = 1:0.97-1
 Provides: text-www-browser
 
@@ -156,6 +155,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Tue Sep 03 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.36.pre6
+- remove ancient Obsoletes tag against links (#1002132)
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.35.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
