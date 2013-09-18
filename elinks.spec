@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.36.%{prerel}%{?dist}
+Release:   0.37.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -41,6 +41,7 @@ Patch10: elinks-nss-inc.patch
 Patch11: elinks-0.12pre5-js185.patch
 Patch12: elinks-0.12pre5-ddg-search.patch
 Patch13: elinks-0.12pre6-autoconf.patch
+Patch14: elinks-0.12pre5-ssl-hostname.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -86,6 +87,9 @@ quickly and swiftly displays Web pages.
 
 # add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
 %patch13 -p1
+
+# verify server certificate hostname with nss_compat_ossl (#881411)
+%patch14 -p1
 
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
@@ -155,6 +159,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Wed Sep 18 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.37.pre6
+- verify server certificate hostname with nss_compat_ossl (#881411)
+
 * Tue Sep 03 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.36.pre6
 - remove ancient Obsoletes tag against links (#1002132)
 
