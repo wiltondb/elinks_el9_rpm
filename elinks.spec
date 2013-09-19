@@ -41,7 +41,7 @@ Patch10: elinks-nss-inc.patch
 Patch11: elinks-0.12pre5-js185.patch
 Patch12: elinks-0.12pre5-ddg-search.patch
 Patch13: elinks-0.12pre6-autoconf.patch
-Patch14: elinks-0.12pre5-ssl-hostname.patch
+Patch14: elinks-0.12pre6-ssl-hostname.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
