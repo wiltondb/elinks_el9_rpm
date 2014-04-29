@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.37.%{prerel}%{?dist}
+Release:   0.38.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -42,6 +42,7 @@ Patch11: elinks-0.12pre5-js185.patch
 Patch12: elinks-0.12pre5-ddg-search.patch
 Patch13: elinks-0.12pre6-autoconf.patch
 Patch14: elinks-0.12pre6-ssl-hostname.patch
+Patch15: elinks-0.12pre6-list_is_singleton.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -90,6 +91,9 @@ quickly and swiftly displays Web pages.
 
 # verify server certificate hostname with nss_compat_ossl (#881411)
 %patch14 -p1
+
+# let list_is_singleton() return false for an empty list (#1075415)
+%patch15 -p1
 
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
@@ -159,6 +163,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Tue Apr 29 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.38.pre6
+- let list_is_singleton() return false for an empty list (#1075415)
+
 * Wed Sep 18 2013 Kamil Dudka <kdudka@redhat.com> - 0.12-0.37.pre6
 - verify server certificate hostname with nss_compat_ossl (#881411)
 
