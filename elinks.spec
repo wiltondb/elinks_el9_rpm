@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.38.%{prerel}%{?dist}
+Release:   0.39.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -17,6 +17,7 @@ BuildRequires: gpm-devel
 BuildRequires: js-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn-devel
+BuildRequires: lua-devel
 BuildRequires: nss_compat_ossl-devel
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
@@ -43,6 +44,7 @@ Patch12: elinks-0.12pre5-ddg-search.patch
 Patch13: elinks-0.12pre6-autoconf.patch
 Patch14: elinks-0.12pre6-ssl-hostname.patch
 Patch15: elinks-0.12pre6-list_is_singleton.patch
+Patch16: elinks-0.12pre6-lua51.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -95,6 +97,9 @@ quickly and swiftly displays Web pages.
 # let list_is_singleton() return false for an empty list (#1075415)
 %patch15 -p1
 
+# use later versions of lua since lua50 is not available (#1098392)
+%patch16 -p1
+
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
 
@@ -107,7 +112,7 @@ autoheader
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
 %configure %{?rescue:--without-gpm} --without-x --with-gssapi \
   --enable-bittorrent --with-nss_compat_ossl --enable-256-colors \
-  --without-openssl --without-gnutls
+  --without-openssl --without-gnutls --with-lua
 
 # uncomment to turn off optimizations
 #sed -i 's/-O2/-O0/' Makefile.config
@@ -163,6 +168,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Wed May 21 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.39.pre6
+- use later versions of lua since lua50 is not available (#1098392)
+
 * Tue Apr 29 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.38.pre6
 - let list_is_singleton() return false for an empty list (#1075415)
 
