@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.39.%{prerel}%{?dist}
+Release:   0.40.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -16,7 +16,7 @@ BuildRequires: expat-devel
 BuildRequires: gpm-devel
 BuildRequires: js-devel
 BuildRequires: krb5-devel
-BuildRequires: libidn-devel
+BuildRequires: libidn2-devel
 BuildRequires: lua-devel
 BuildRequires: nss_compat_ossl-devel
 BuildRequires: pkgconfig
@@ -45,6 +45,7 @@ Patch13: elinks-0.12pre6-autoconf.patch
 Patch14: elinks-0.12pre6-ssl-hostname.patch
 Patch15: elinks-0.12pre6-list_is_singleton.patch
 Patch16: elinks-0.12pre6-lua51.patch
+Patch17: elinks-0.12pre6-libidn2.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -99,6 +100,9 @@ quickly and swiftly displays Web pages.
 
 # use later versions of lua since lua50 is not available (#1098392)
 %patch16 -p1
+
+# add support for GNU Libidn2, patch by Robert Scheck (#1098789)
+%patch17 -p1
 
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
@@ -168,6 +172,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Fri May 30 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.40.pre6
+- add support for GNU Libidn2, patch by Robert Scheck (#1098789)
+
 * Wed May 21 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.39.pre6
 - use later versions of lua since lua50 is not available (#1098392)
 
