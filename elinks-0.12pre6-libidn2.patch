@@ -23,7 +23,7 @@ diff --git a/Makefile.config.in b/Makefile.config.in
 index fe1a559..829d350 100644
 --- a/Makefile.config.in
 +++ b/Makefile.config.in
-@@ -129,7 +129,7 @@ CONFIG_GOPHER = @CONFIG_GOPHER@
+@@ -130,7 +130,7 @@ CONFIG_GOPHER = @CONFIG_GOPHER@
  CONFIG_GPM = @CONFIG_GPM@
  CONFIG_GZIP = @CONFIG_GZIP@
  CONFIG_HTML_HIGHLIGHT = @CONFIG_HTML_HIGHLIGHT@
@@ -36,7 +36,7 @@ diff --git a/configure.in b/configure.in
 index 3ef8603..3f74d9c 100644
 --- a/configure.in
 +++ b/configure.in
-@@ -472,8 +472,8 @@ EL_CONFIG_OPTIONAL_LIBRARY(CONFIG_GZIP, zlib, zlib.h, z, gzclearerr,
+@@ -473,8 +473,8 @@ EL_CONFIG_OPTIONAL_LIBRARY(CONFIG_GZIP, zlib, zlib.h, z, gzclearerr,
  EL_CONFIG_OPTIONAL_LIBRARY(CONFIG_BZIP2, bzlib, bzlib.h, bz2, BZ2_bzReadOpen,
  	[  --without-bzlib         disable bzlib support])
  
