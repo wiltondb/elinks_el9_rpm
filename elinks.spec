@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.40.%{prerel}%{?dist}
+Release:   0.41.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -172,6 +172,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-0.41.pre6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Fri May 30 2014 Kamil Dudka <kdudka@redhat.com> - 0.12-0.40.pre6
 - add support for GNU Libidn2, patch by Robert Scheck (#1098789)
 
