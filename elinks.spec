@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.43.%{prerel}%{?dist}
+Release:   0.44.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -18,7 +18,7 @@ BuildRequires: js-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn2-devel
 BuildRequires: lua-devel
-BuildRequires: nss_compat_ossl-devel
+BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
 Requires(preun): %{_sbindir}/alternatives
@@ -37,8 +37,6 @@ Patch4: elinks-0.11.0-sysname.patch
 Patch5: elinks-0.10.1-xterm.patch
 Patch7: elinks-0.11.3-macropen.patch
 Patch8: elinks-scroll.patch
-Patch9: elinks-nss.patch
-Patch10: elinks-nss-inc.patch
 Patch11: elinks-0.12pre5-js185.patch
 Patch12: elinks-0.12pre5-ddg-search.patch
 Patch13: elinks-0.12pre6-autoconf.patch
@@ -77,12 +75,6 @@ quickly and swiftly displays Web pages.
 #upstream fix for out of screen dialogs
 %patch8 -p1
 
-# Port elinks to use NSS library for cryptography (#346861) - accepted upstream
-%patch9 -p1
-
-# Port elinks to use NSS library for cryptography (#346861) - incremental patch
-%patch10 -p1
-
 # backported upstream commits f31cf6f, 2844f8b, 218a225, and 12803e4
 %patch11 -p1
 
@@ -92,7 +84,7 @@ quickly and swiftly displays Web pages.
 # add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
 %patch13 -p1
 
-# verify server certificate hostname with nss_compat_ossl (#881411)
+# verify server certificate hostname with OpenSSL (#881411)
 %patch14 -p1
 
 # let list_is_singleton() return false for an empty list (#1075415)
@@ -114,9 +106,14 @@ autoheader
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
-%configure %{?rescue:--without-gpm} --without-x --with-gssapi \
-  --enable-bittorrent --with-nss_compat_ossl --enable-256-colors \
-  --without-openssl --without-gnutls --with-lua
+%configure %{?rescue:--without-gpm} \
+    --enable-256-colors             \
+    --enable-bittorrent             \
+    --with-gssapi                   \
+    --with-lua                      \
+    --with-openssl                  \
+    --without-gnutls                \
+    --without-x
 
 # uncomment to turn off optimizations
 #sed -i 's/-O2/-O0/' Makefile.config
@@ -172,6 +169,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon Mar 30 2015 Kamil Dudka <kdudka@redhat.com> - 0.12-0.44.pre6
+- use OpenSSL instead of nss_compat_ossl, which is no longer maintained
+
 * Fri Jan 16 2015 Tom Callaway <spot@fedoraproject.org> - 0.12-0.43.pre6
 - rebuild for lua 5.3
 
