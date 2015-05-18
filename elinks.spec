@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.44.%{prerel}%{?dist}
+Release:   0.45.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -169,6 +169,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon May 18 2015 Kamil Dudka <kdudka@redhat.com> - 0.12-0.45.pre6
+- remove an obsolete configuration option from /etc/elinks.conf (#1222555)
+
 * Mon Mar 30 2015 Kamil Dudka <kdudka@redhat.com> - 0.12-0.44.pre6
 - use OpenSSL instead of nss_compat_ossl, which is no longer maintained
 
