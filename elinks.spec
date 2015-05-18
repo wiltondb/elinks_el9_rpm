@@ -570,7 +570,7 @@ exit 0
 * Sun Dec 24 2000 Bernhard Rosenkraenzer <bero@redhat.com>
 - pre9
 
-* Mon Dec 10 2000 Preston Brown <pbrown@redhat.com>
+* Mon Dec 11 2000 Preston Brown <pbrown@redhat.com>
 - Upgraded to pre8.
 
 * Tue Dec  5 2000 Bernhard Rosenkraenzer <bero@redhat.com>
