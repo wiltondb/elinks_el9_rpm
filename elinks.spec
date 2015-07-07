@@ -96,6 +96,11 @@ quickly and swiftly displays Web pages.
 # add support for GNU Libidn2, patch by Robert Scheck (#1098789)
 %patch17 -p1
 
+# rename the input file of autoconf to eliminate a warning
+mv -v configure.in configure.ac
+sed -e 's/configure\.in/configure.ac/' \
+    -i Makefile* acinclude.m4 doc/man/man1/Makefile
+
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
 
