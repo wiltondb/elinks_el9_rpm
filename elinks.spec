@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.50.%{prerel}%{?dist}
+Release:   0.51.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -30,21 +30,50 @@ Provides:  webclient
 Provides:  links = 1:0.97-1
 Provides: text-www-browser
 
+# Prevent crash when HOME is unset (bug #90663).
 Patch0: elinks-0.11.0-ssl-noegd.patch
+
+# UTF-8 by default
 Patch1: elinks-0.10.1-utf_8_io-default.patch
+
+# Make getaddrinfo call use AI_ADDRCONFIG.
 Patch3: elinks-0.11.0-getaddrinfo.patch
+
+# Don't put so much information in the user-agent header string (bug #97273).
 Patch4: elinks-0.11.0-sysname.patch
+
+# Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 Patch5: elinks-0.10.1-xterm.patch
+
+# fix for open macro in new glibc
 Patch7: elinks-0.11.3-macropen.patch
+
+#upstream fix for out of screen dialogs
 Patch8: elinks-scroll.patch
+
+# backported upstream commits f31cf6f, 2844f8b, 218a225, and 12803e4
 Patch11: elinks-0.12pre5-js185.patch
+
+# add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
 Patch12: elinks-0.12pre5-ddg-search.patch
+
+# add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
 Patch13: elinks-0.12pre6-autoconf.patch
+
+# verify server certificate hostname with OpenSSL (#881411)
 Patch14: elinks-0.12pre6-ssl-hostname.patch
+
+# let list_is_singleton() return false for an empty list (#1075415)
 Patch15: elinks-0.12pre6-list_is_singleton.patch
+
+# use later versions of lua since lua50 is not available (#1098392)
 Patch16: elinks-0.12pre6-lua51.patch
+
+# add support for GNU Libidn2, patch by Robert Scheck (#1098789)
 Patch17: elinks-0.12pre6-libidn2.patch
-Patch18: elinks-0.12pre6-openssl11.patch
+
+# drop disablement of TLS1.0 on second attempt to connect
+Patch19: elinks-0.12pre6-openssl11.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -53,52 +82,7 @@ advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%setup -q -n %{name}-%{version}%{prerel}
-
-# Prevent crash when HOME is unset (bug #90663).
-%patch0 -p1
-
-# UTF-8 by default
-%patch1 -p1
-
-# Make getaddrinfo call use AI_ADDRCONFIG.
-%patch3 -p1
-
-# Don't put so much information in the user-agent header string (bug #97273).
-%patch4 -p1
-
-# Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
-%patch5 -p1
-
-# fix for open macro in new glibc
-%patch7 -p1
-
-#upstream fix for out of screen dialogs
-%patch8 -p1
-
-# backported upstream commits f31cf6f, 2844f8b, 218a225, and 12803e4
-%patch11 -p1
-
-# add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
-%patch12 -p1
-
-# add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
-%patch13 -p1
-
-# verify server certificate hostname with OpenSSL (#881411)
-%patch14 -p1
-
-# let list_is_singleton() return false for an empty list (#1075415)
-%patch15 -p1
-
-# use later versions of lua since lua50 is not available (#1098392)
-%patch16 -p1
-
-# add support for GNU Libidn2, patch by Robert Scheck (#1098789)
-%patch17 -p1
-
-# drop disablement of TLS1.0 on second attempt to connect
-%patch18 -p1 -b .openssl11
+%autosetup -p1 -n %{name}-%{version}%{prerel}
 
 # rename the input file of autoconf to eliminate a warning
 mv -v configure.in configure.ac
@@ -178,6 +162,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Fri Feb 17 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.51.pre6
+- apply patches automatically to ease maintenance
+
 * Fri Feb 17 2017 Tomáš Mráz <tmraz@redhat.com> - 0.12-0.50.pre6
 - drop disablement of TLS1.0 on second attempt to connect,
   it would not work correctly anyway and the code does not build
