@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.49.%{prerel}%{?dist}
+Release:   0.50.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -44,6 +44,7 @@ Patch14: elinks-0.12pre6-ssl-hostname.patch
 Patch15: elinks-0.12pre6-list_is_singleton.patch
 Patch16: elinks-0.12pre6-lua51.patch
 Patch17: elinks-0.12pre6-libidn2.patch
+Patch18: elinks-0.12pre6-openssl11.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -95,6 +96,9 @@ quickly and swiftly displays Web pages.
 
 # add support for GNU Libidn2, patch by Robert Scheck (#1098789)
 %patch17 -p1
+
+# drop disablement of TLS1.0 on second attempt to connect
+%patch18 -p1 -b .openssl11
 
 # rename the input file of autoconf to eliminate a warning
 mv -v configure.in configure.ac
@@ -174,6 +178,11 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Fri Feb 17 2017 Tomáš Mráz <tmraz@redhat.com> - 0.12-0.50.pre6
+- drop disablement of TLS1.0 on second attempt to connect,
+  it would not work correctly anyway and the code does not build
+  with OpenSSL-1.1.0
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.49.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

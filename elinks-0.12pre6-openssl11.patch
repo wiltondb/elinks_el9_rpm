@@ -1,0 +1,32 @@
+diff -up elinks-0.12pre6/src/network/ssl/socket.c.openssl11 elinks-0.12pre6/src/network/ssl/socket.c
+--- elinks-0.12pre6/src/network/ssl/socket.c.openssl11	2017-02-17 16:41:26.346909430 +0100
++++ elinks-0.12pre6/src/network/ssl/socket.c	2017-02-17 16:40:34.000000000 +0100
+@@ -82,6 +82,11 @@
+ static void
+ ssl_set_no_tls(struct socket *socket)
+ {
++#if 0
++/* This implements the insecure renegotiation, which should not be used.
++ * The code also would not work on current Fedora (>= Fedora 23) anyway,
++ * because it would just switch off TLS 1.0 keeping TLS 1.1 and 1.2 enabled.
++ */
+ #ifdef CONFIG_OPENSSL
+ 	((ssl_t *) socket->ssl)->options |= SSL_OP_NO_TLSv1;
+ #elif defined(CONFIG_GNUTLS)
+@@ -96,6 +101,7 @@ ssl_set_no_tls(struct socket *socket)
+ 		gnutls_protocol_set_priority(*(ssl_t *) socket->ssl, protocol_priority);
+ 	}
+ #endif
++#endif
+ }
+ 
+ #ifdef USE_OPENSSL
+@@ -419,7 +425,7 @@ ssl_connect(struct socket *socket)
+ 		}
+ 
+ 		if (client_cert) {
+-			SSL_CTX *ctx = ((SSL *) socket->ssl)->ctx;
++			SSL_CTX *ctx = SSL_get_SSL_CTX((SSL *) socket->ssl);
+ 
+ 			SSL_CTX_use_certificate_chain_file(ctx, client_cert);
+ 			SSL_CTX_use_PrivateKey_file(ctx, client_cert,
