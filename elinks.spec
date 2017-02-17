@@ -72,6 +72,9 @@ Patch16: elinks-0.12pre6-lua51.patch
 # add support for GNU Libidn2, patch by Robert Scheck (#1098789)
 Patch17: elinks-0.12pre6-libidn2.patch
 
+# make configure.ac recognize recent versions of GCC
+Patch18: elinks-0.12pre6-recent-gcc-versions.patch
+
 # drop disablement of TLS1.0 on second attempt to connect
 Patch19: elinks-0.12pre6-openssl11.patch
 
@@ -163,6 +166,7 @@ exit 0
 
 %changelog
 * Fri Feb 17 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.51.pre6
+- make configure.ac recognize recent versions of GCC
 - apply patches automatically to ease maintenance
 
 * Fri Feb 17 2017 Tomáš Mráz <tmraz@redhat.com> - 0.12-0.50.pre6
