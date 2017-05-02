@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.51.%{prerel}%{?dist}
+Release:   0.52.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -166,6 +166,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Tue May 02 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.52.pre6
+- rebuild against js-devel with ABI-incompatible <js/jsval.h> (#1446545)
+
 * Fri Feb 17 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.51.pre6
 - fix compatibility with OpenSSL 1.1 (#1423519)
 - make configure.ac recognize recent versions of GCC
