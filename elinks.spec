@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.54.%{prerel}%{?dist}
+Release:   0.55.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -96,7 +96,7 @@ sed -e 's/configure\.in/configure.ac/' \
 # remove bogus serial numbers
 sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
 
-# we need to recreate autotools files because of the NSS patch
+# recreate autotools files
 aclocal -I config/m4
 autoconf
 autoheader
@@ -112,15 +112,7 @@ export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
     --without-gnutls                \
     --without-x
 
-# uncomment to turn off optimizations
-#sed -i 's/-O2/-O0/' Makefile.config
-
-MOPTS="V=1"
-if tty >/dev/null 2>&1; then
-    # turn on fancy colorized output only when we have a TTY device
-    MOPTS=
-fi
-make %{?_smp_mflags} $MOPTS
+make %{?_smp_mflags} V=1
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT V=1
@@ -157,7 +149,7 @@ fi
 exit 0
 
 %files -f elinks.lang
-%doc README SITES TODO COPYING
+%doc COPYING README
 %ghost %verify(not md5 size mtime) %{_bindir}/links
 %{_bindir}/elinks
 %ghost %verify(not md5 size mtime) %{_mandir}/man1/links.1.gz
@@ -166,6 +158,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Wed Oct 11 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.55.pre6
+- always build verbosely, drop outdated doc files
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.54.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
