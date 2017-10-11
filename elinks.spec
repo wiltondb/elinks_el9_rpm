@@ -14,7 +14,6 @@ BuildRequires: automake
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: gpm-devel
-BuildRequires: js-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn2-devel
 BuildRequires: lua-devel
@@ -50,9 +49,6 @@ Patch7: elinks-0.11.3-macropen.patch
 
 #upstream fix for out of screen dialogs
 Patch8: elinks-scroll.patch
-
-# backported upstream commits f31cf6f, 2844f8b, 218a225, and 12803e4
-Patch11: elinks-0.12pre5-js185.patch
 
 # add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
 Patch12: elinks-0.12pre5-ddg-search.patch
@@ -110,6 +106,7 @@ export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
     --with-lua                      \
     --with-openssl                  \
     --without-gnutls                \
+    --without-spidermonkey          \
     --without-x
 
 make %{?_smp_mflags} V=1
@@ -159,6 +156,7 @@ exit 0
 
 %changelog
 * Wed Oct 11 2017 Kamil Dudka <kdudka@redhat.com> - 0.12-0.55.pre6
+- drop support for JS engine that is no longer maintained
 - always build verbosely, drop outdated doc files
 
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.54.pre6
