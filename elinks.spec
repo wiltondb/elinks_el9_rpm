@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.57.%{prerel}%{?dist}
+Release:   0.58.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -156,6 +156,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.58.pre6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Mon Feb 19 2018 Kamil Dudka <kdudka@redhat.com> - 0.12-0.57.pre6
 - add explicit BR for the gcc compiler
 
