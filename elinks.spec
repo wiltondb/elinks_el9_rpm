@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.58.%{prerel}%{?dist}
+Release:   0.59.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Group:     Applications/Internet
@@ -75,6 +75,9 @@ Patch18: elinks-0.12pre6-recent-gcc-versions.patch
 # fix compatibility with OpenSSL 1.1 (#1423519) and ...
 # drop disablement of TLS1.0 on second attempt to connect
 Patch19: elinks-0.12pre6-openssl11.patch
+
+# fix programming mistakes detected by static analysis
+Patch20: elinks-0.12pre6-static-analysis.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -156,6 +159,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Wed Nov 07 2018 Kamil Dudka <kdudka@redhat.com> - 0.12-0.59.pre6
+- fix programming mistakes detected by static analysis
+
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.58.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
