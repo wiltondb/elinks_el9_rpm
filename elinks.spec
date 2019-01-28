@@ -6,7 +6,6 @@ Version:   0.12
 Release:   0.59.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
-Group:     Applications/Internet
 Source:    http://elinks.or.cz/download/elinks-%{version}%{prerel}.tar.bz2
 Source2:   elinks.conf
 
