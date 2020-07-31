@@ -3,7 +3,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.12
-Release:   0.63.%{prerel}%{?dist}
+Release:   0.64.%{prerel}%{?dist}
 License:   GPLv2
 URL:       http://elinks.or.cz
 Source:    http://elinks.or.cz/download/elinks-%{version}%{prerel}.tar.bz2
@@ -102,6 +102,10 @@ autoheader
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS $(getconf LFS_CFLAGS) -D_GNU_SOURCE"
+
+# make the code build with lua-5.4.x
+CFLAGS="$CFLAGS -DLUA_COMPAT_5_3"
+
 %configure %{?rescue:--without-gpm} \
     --enable-256-colors             \
     --enable-bittorrent             \
@@ -158,6 +162,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Fri Jul 31 2020 Kamil Dudka <kdudka@redhat.com> - 0.12-0.64.pre6
+- make the code build with lua-5.4.x
+
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.63.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
