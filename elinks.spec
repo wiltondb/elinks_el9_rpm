@@ -20,6 +20,7 @@ BuildRequires: lua-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
+BuildRequires: make
 Requires(preun): %{_sbindir}/alternatives
 Requires(post): coreutils
 Requires(post): %{_sbindir}/alternatives
