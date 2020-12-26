@@ -26,8 +26,8 @@ Requires(post): coreutils
 Requires(post): %{_sbindir}/alternatives
 Requires(postun): coreutils
 Requires(postun): %{_sbindir}/alternatives
-Provides:  webclient
-Provides:  links = 1:0.97-1
+Provides: webclient
+Provides: links = 1:0.97-1
 Provides: text-www-browser
 
 # Prevent crash when HOME is unset (bug #90663).
@@ -117,13 +117,12 @@ CFLAGS="$CFLAGS -DLUA_COMPAT_5_3"
     --without-spidermonkey          \
     --without-x
 
-make %{?_smp_mflags} V=1
+%make_build
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT V=1
+%make_install
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/locale.alias
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
-install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/elinks.conf
+install -D -p -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/elinks.conf
 touch $RPM_BUILD_ROOT%{_bindir}/links
 true | gzip -c > $RPM_BUILD_ROOT%{_mandir}/man1/links.1.gz
 %find_lang elinks
@@ -154,7 +153,8 @@ fi
 exit 0
 
 %files -f elinks.lang
-%doc COPYING README
+%license COPYING
+%doc README
 %ghost %verify(not md5 size mtime) %{_bindir}/links
 %{_bindir}/elinks
 %ghost %verify(not md5 size mtime) %{_mandir}/man1/links.1.gz
