@@ -10,7 +10,7 @@ Source2:   elinks.conf
 BuildRequires: automake
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
-BuildRequires: gcc
+BuildRequires: gcc-c++
 BuildRequires: gpm-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn2-devel
