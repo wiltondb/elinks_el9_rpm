@@ -1,12 +1,10 @@
-%global prerel pre6
-
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.12
-Release:   0.68.%{prerel}%{?dist}
+Version:   0.15.0
+Release:   1%{?dist}
 License:   GPLv2
-URL:       http://elinks.or.cz
-Source:    http://elinks.or.cz/download/elinks-%{version}%{prerel}.tar.bz2
+URL:       https://github.com/rkd77/elinks
+Source:    https://github.com/rkd77/elinks/releases/download/v%{version}/elinks-%{version}.tar.xz
 Source2:   elinks.conf
 
 BuildRequires: automake
@@ -31,7 +29,7 @@ Provides: links = 1:0.97-1
 Provides: text-www-browser
 
 # Prevent crash when HOME is unset (bug #90663).
-Patch0: elinks-0.11.0-ssl-noegd.patch
+Patch0: 0000-elinks-0.15.0-ssl-noegd.patch
 
 # UTF-8 by default
 Patch1: elinks-0.10.1-utf_8_io-default.patch
@@ -40,44 +38,22 @@ Patch1: elinks-0.10.1-utf_8_io-default.patch
 Patch3: elinks-0.11.0-getaddrinfo.patch
 
 # Don't put so much information in the user-agent header string (bug #97273).
-Patch4: elinks-0.11.0-sysname.patch
+Patch4: 0004-elinks-0.15.0-sysname.patch
 
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
-Patch5: elinks-0.10.1-xterm.patch
+Patch5: 0005-elinks-0.15.0-xterm.patch
 
 # fix for open macro in new glibc
 Patch7: elinks-0.11.3-macropen.patch
 
-#upstream fix for out of screen dialogs
-Patch8: elinks-scroll.patch
-
-# add default "ddg" dumb/smart rewrite prefixes for DuckDuckGo (#856348)
-Patch12: elinks-0.12pre5-ddg-search.patch
-
-# add missing AC_LANG_PROGRAM around the first argument of AC_COMPILE_IFELSE
-Patch13: elinks-0.12pre6-autoconf.patch
-
-# verify server certificate hostname with OpenSSL (#881411)
-Patch14: elinks-0.12pre6-ssl-hostname.patch
-
 # let list_is_singleton() return false for an empty list (#1075415)
 Patch15: elinks-0.12pre6-list_is_singleton.patch
 
-# use later versions of lua since lua50 is not available (#1098392)
-Patch16: elinks-0.12pre6-lua51.patch
-
 # add support for GNU Libidn2, patch by Robert Scheck (#1098789)
-Patch17: elinks-0.12pre6-libidn2.patch
-
-# make configure.ac recognize recent versions of GCC
-Patch18: elinks-0.12pre6-recent-gcc-versions.patch
-
-# fix compatibility with OpenSSL 1.1 (#1423519) and ...
-# drop disablement of TLS1.0 on second attempt to connect
-Patch19: elinks-0.12pre6-openssl11.patch
+Patch17: 0017-elinks-0.15.0-libidn2.patch
 
 # fix programming mistakes detected by static analysis
-Patch20: elinks-0.12pre6-static-analysis.patch
+Patch20: 0020-elinks-0.15.0-static-analysis.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -86,15 +62,10 @@ advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
-%autosetup -p1 -n %{name}-%{version}%{prerel}
-
-# rename the input file of autoconf to eliminate a warning
-mv -v configure.in configure.ac
-sed -e 's/configure\.in/configure.ac/' \
-    -i Makefile* acinclude.m4 doc/man/man1/Makefile
+%autosetup -p1
 
 # remove bogus serial numbers
-sed -i 's/^# *serial [AM0-9]*$//' acinclude.m4 config/m4/*.m4
+sed -e 's/^# *serial [AM0-9]*$//' -i config/m4/*.m4
 
 # recreate autotools files
 aclocal -I config/m4
@@ -163,6 +134,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon Apr 11 2022 Kamil Dudka <kdudka@redhat.com> - 0.15.0-1
+- new upstream release
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.12-0.68.pre6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
