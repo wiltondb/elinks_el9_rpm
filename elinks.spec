@@ -11,6 +11,7 @@ BuildRequires: automake
 BuildRequires: bzip2-devel
 BuildRequires: expat-devel
 BuildRequires: gcc-c++
+BuildRequires: gettext
 BuildRequires: gpm-devel
 BuildRequires: krb5-devel
 BuildRequires: libidn2-devel
