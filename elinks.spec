@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
-Version:   0.15.0
-Release:   2%{?dist}
+Version:   0.15.1
+Release:   1%{?dist}
 License:   GPLv2
 URL:       https://github.com/rkd77/elinks
 Source:    https://github.com/rkd77/elinks/releases/download/v%{version}/elinks-%{version}.tar.xz
@@ -33,7 +33,7 @@ Provides: text-www-browser
 Patch0: 0000-elinks-0.15.0-ssl-noegd.patch
 
 # UTF-8 by default
-Patch1: elinks-0.10.1-utf_8_io-default.patch
+Patch1: 0001-elinks-0.15.1-utf_8_io-default.patch
 
 # Make getaddrinfo call use AI_ADDRCONFIG.
 Patch3: elinks-0.11.0-getaddrinfo.patch
@@ -44,17 +44,8 @@ Patch4: 0004-elinks-0.15.0-sysname.patch
 # Fix xterm terminal: "Linux" driver seems better than "VT100" (#128105)
 Patch5: 0005-elinks-0.15.0-xterm.patch
 
-# fix for open macro in new glibc
-Patch7: elinks-0.11.3-macropen.patch
-
 # let list_is_singleton() return false for an empty list (#1075415)
 Patch15: elinks-0.12pre6-list_is_singleton.patch
-
-# add support for GNU Libidn2, patch by Robert Scheck (#1098789)
-Patch17: 0017-elinks-0.15.0-libidn2.patch
-
-# fix programming mistakes detected by static analysis
-Patch20: 0020-elinks-0.15.0-static-analysis.patch
 
 %description
 Elinks is a text-based Web browser. Elinks does not display any images,
@@ -135,6 +126,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Mon Aug 01 2022 Kamil Dudka <kdudka@redhat.com> - 0.15.1-1
+- new upstream release
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 0.15.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
