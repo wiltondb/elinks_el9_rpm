@@ -4,7 +4,9 @@ Version:   0.15.1
 Release:   1%{?dist}
 License:   GPLv2
 URL:       https://github.com/rkd77/elinks
-Source:    https://github.com/rkd77/elinks/releases/download/v%{version}/elinks-%{version}.tar.xz
+Source0:    elinks-%{version}.tar.xz
+%global    source0_sha512 677eeeeab3fc24dcfe4e7248a9c1a8e07083ebd13bd9923d89702a04dbe1c3e4d4038029c095881183d7f11ae2c5317ff7e5458320644fde0c176378b89068d8
+%global    source0_url https://src.fedoraproject.org/repo/pkgs/elinks/elinks-%{version}.tar.xz/sha512/%{source0_sha512}/elinks-%{version}.tar.xz
 Source2:   elinks.conf
 
 BuildRequires: automake
@@ -19,6 +21,7 @@ BuildRequires: lua-devel
 BuildRequires: make
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
+BuildRequires: wget
 BuildRequires: zlib-devel
 Requires(preun): %{_sbindir}/alternatives
 Requires(post): coreutils
@@ -54,6 +57,14 @@ advantage over graphical browsers is its speed--Elinks starts and exits
 quickly and swiftly displays Web pages.
 
 %prep
+pushd %{_sourcedir}
+if [ ! -s %{SOURCE0} ] ; then
+	rm %{SOURCE0}
+	wget -nv %{source0_url}
+fi
+echo "%{source0_sha512}  $(basename %{SOURCE0})" | sha512sum -c
+popd
+
 %autosetup -p1
 
 # remove bogus serial numbers
