@@ -1,7 +1,7 @@
 Name:      elinks
 Summary:   A text-mode Web browser
 Version:   0.15.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   GPLv2
 URL:       https://github.com/rkd77/elinks
 Source0:    elinks-%{version}.tar.xz
@@ -137,6 +137,9 @@ exit 0
 %{_mandir}/man5/*
 
 %changelog
+* Fri Dec 23 2022 Alex Kasko <alex@staticlibs.net - 0.15.1-2
+- Build for el 9
+
 * Mon Aug 01 2022 Kamil Dudka <kdudka@redhat.com> - 0.15.1-1
 - new upstream release
 
